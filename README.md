@@ -13,7 +13,7 @@ Turn model scores into **actions you can defend**: *auto-approve / auto-reject /
 <img alt="Status" src="https://img.shields.io/badge/Status-Research%20Prototype-yellow" />
 
 </div>
- 
+  
 ---  
     
 ## Why this repo exists
