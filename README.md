@@ -14,7 +14,7 @@ Turn model scores into **actions you can defend**: *auto-approve / auto-reject /
 
 </div>
  
----
+--- 
      
 ## Why this repo exists
 
