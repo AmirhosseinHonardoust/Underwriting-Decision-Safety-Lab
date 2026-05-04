@@ -15,7 +15,7 @@ Turn model scores into **actions you can defend**: *auto-approve / auto-reject /
 </div>
  
 ---
- 
+  
 ## Why this repo exists
 
 Most ML projects stop at **“here’s the AUC”**. Underwriting can’t.
