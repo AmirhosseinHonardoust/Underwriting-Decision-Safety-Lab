@@ -1,7 +1,7 @@
 <div align="center">
 
 # Underwriting Decision Safety Lab
-
+ 
 **Calibration + abstention + decision-safe policy UI for loan approval.**  
 Turn model scores into **actions you can defend**: *auto-approve / auto-reject / send-to-review*.
 
