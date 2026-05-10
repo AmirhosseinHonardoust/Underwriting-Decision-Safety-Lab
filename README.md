@@ -11,7 +11,7 @@ Turn model scores into **actions you can defend**: *auto-approve / auto-reject /
 <img alt="pandas" src="https://img.shields.io/badge/pandas-Data%20Frames-150458" />
 <img alt="License" src="https://img.shields.io/badge/License-MIT-green" />
 <img alt="Status" src="https://img.shields.io/badge/Status-Research%20Prototype-yellow" />
- 
+
 </div>
  
 ---
