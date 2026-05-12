@@ -17,7 +17,7 @@ Turn model scores into **actions you can defend**: *auto-approve / auto-reject /
 ---
 
 ## Why this repo exists
-  
+   
 Most ML projects stop at **“here’s the AUC”**. Underwriting can’t.
 
 In lending, a prediction is only useful if it can be turned into a *decision policy* with:
