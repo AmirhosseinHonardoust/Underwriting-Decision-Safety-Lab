@@ -5,7 +5,7 @@ from typing import Dict
 import numpy as np
 import pandas as pd
 from sklearn.metrics import accuracy_score, f1_score
- 
+  
   
 def coverage_curve(y_true: np.ndarray, p_approve: np.ndarray, thresholds: np.ndarray) -> pd.DataFrame:
     y_true = np.asarray(y_true)
