@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import numpy as np
 from sklearn.calibration import CalibratedClassifierCV
-    
+     
      
 def expected_calibration_error(y_true: np.ndarray, p: np.ndarray, n_bins: int = 10) -> float:
     y_true = np.asarray(y_true)
