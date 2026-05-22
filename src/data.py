@@ -4,8 +4,8 @@ from dataclasses import dataclass
 from typing import List
 
 import pandas as pd
-   
-   
+
+
 TARGET_CANDIDATES = ["loan_approved", "approved", "LoanApproved", "target", "label"]
 
 
