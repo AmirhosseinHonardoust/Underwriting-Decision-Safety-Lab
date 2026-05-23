@@ -7,7 +7,7 @@ from sklearn.calibration import CalibratedClassifierCV
 def expected_calibration_error(y_true: np.ndarray, p: np.ndarray, n_bins: int = 10) -> float:
     y_true = np.asarray(y_true)
     p = np.asarray(p)
-
+ 
     bins = np.linspace(0.0, 1.0, n_bins + 1)
     ece = 0.0
     n = len(p)
