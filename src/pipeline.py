@@ -97,7 +97,7 @@ Use a calibrated model to approve/reject automatically when confident; otherwise
 ## Calibration health (test)
 - ECE: {metrics['ece']:.4f}
 - Brier: {metrics['brier']:.4f}
-
+ 
 ## Monitoring triggers (suggested)
 - If coverage shifts by > 10% vs baseline, re-check score distribution.
 - If ECE doubles vs baseline, re-calibrate or retrain.
