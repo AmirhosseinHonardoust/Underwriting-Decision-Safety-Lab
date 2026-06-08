@@ -11,6 +11,7 @@ from sklearn.pipeline import Pipeline
 
 from .abstention import coverage_curve, recommend_threshold
 from .calibration import calibrate, expected_calibration_error
+from .evaluation import compute_baseline_metrics, select_policy_variants
 from .data import basic_quality_report, infer_spec, load_csv
 from .modeling import compute_binary_metrics, make_base_model, make_preprocessor, train_test_split_data
 from .validation import validate_underwriting_dataframe
@@ -18,6 +19,7 @@ from .plots import (
     plot_confusion_matrix,
     plot_coverage_vs_performance,
     plot_probability_histograms,
+    plot_precision_recall_curve,
     plot_reliability_diagram,
 )
 
@@ -61,15 +63,28 @@ def run(
     metrics["labels"] = ["reject", "approve"]
     metrics["calibration_method"] = str(calibration_method)
 
+    baseline_metrics = compute_baseline_metrics(split.X_train, split.y_train, split.X_test, split.y_test)
+
     thresholds = np.linspace(0.50, 0.99, 40)
     curve = coverage_curve(split.y_test, p_test, thresholds)
     policy = recommend_threshold(curve, target_coverage=float(recommend_target_coverage))
     policy["target_coverage"] = float(recommend_target_coverage)
     policy["calibration_method"] = str(calibration_method)
+    policy_variants = select_policy_variants(curve, target_coverage=float(recommend_target_coverage))
 
     (out_dir_p / "metrics_overall.json").write_text(json.dumps(metrics, indent=2), encoding="utf-8")
+    (out_dir_p / "baseline_metrics.json").write_text(json.dumps(baseline_metrics, indent=2), encoding="utf-8")
+    (out_dir_p / "policy_variants.json").write_text(json.dumps(policy_variants, indent=2), encoding="utf-8")
     curve.to_csv(out_dir_p / "coverage_curve.csv", index=False)
     (out_dir_p / "abstention_policy.json").write_text(json.dumps(policy, indent=2), encoding="utf-8")
+
+    evaluation_summary = {
+        "model_metrics": metrics,
+        "baseline_metrics": baseline_metrics,
+        "recommended_policy": policy,
+        "policy_variants": policy_variants,
+    }
+    (out_dir_p / "evaluation_summary.json").write_text(json.dumps(evaluation_summary, indent=2), encoding="utf-8")
 
     preds = split.X_test.copy()
     preds["y_true"] = split.y_test
@@ -101,9 +116,10 @@ Use a calibrated model to approve/reject automatically when confident; otherwise
 - Accuracy (auto-decisions): {policy['expected_accuracy_auto']:.3f}
 - F1 (auto-decisions): {policy['expected_f1_auto']:.3f}
 
-## Calibration health (test)
+## Calibration and ranking health (test)
 - ECE: {metrics['ece']:.4f}
 - Brier: {metrics['brier']:.4f}
+- Average precision: {metrics['average_precision']:.4f}
  
 ## Monitoring triggers (suggested)
 - If coverage shifts by > 10% vs baseline, re-check score distribution.
@@ -115,12 +131,13 @@ Use a calibrated model to approve/reject automatically when confident; otherwise
     plot_confusion_matrix(split.y_test, y_pred, fig_dir_p / "confusion_matrix.png")
     plot_reliability_diagram(split.y_test, p_test, fig_dir_p / "reliability_diagram.png")
     plot_probability_histograms(split.y_test, p_test, fig_dir_p / "probability_histograms.png")
+    plot_precision_recall_curve(split.y_test, p_test, fig_dir_p / "precision_recall_curve.png")
     plot_coverage_vs_performance(curve, fig_dir_p / "coverage_vs_performance.png")
 
     dq = basic_quality_report(df, spec)
     (out_dir_p / "data_quality.json").write_text(json.dumps(dq, indent=2), encoding="utf-8")
 
-    return {"metrics": metrics, "policy": policy, "outputs_dir": str(out_dir_p), "figures_dir": str(fig_dir_p)}
+    return {"metrics": metrics, "policy": policy, "baseline_metrics": baseline_metrics, "policy_variants": policy_variants, "outputs_dir": str(out_dir_p), "figures_dir": str(fig_dir_p)}
 
 
 def main() -> None:

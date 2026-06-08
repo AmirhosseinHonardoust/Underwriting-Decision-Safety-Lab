@@ -7,7 +7,7 @@ import numpy as np
 import pandas as pd
 from sklearn.compose import ColumnTransformer
 from sklearn.linear_model import LogisticRegression
-from sklearn.metrics import accuracy_score, brier_score_loss, f1_score, roc_auc_score
+from sklearn.metrics import accuracy_score, average_precision_score, brier_score_loss, f1_score, roc_auc_score
 from sklearn.model_selection import train_test_split
 from sklearn.pipeline import Pipeline
 from sklearn.preprocessing import OneHotEncoder, StandardScaler
@@ -58,6 +58,7 @@ def compute_binary_metrics(y_true: np.ndarray, proba_approve: np.ndarray, y_pred
         "accuracy": float(accuracy_score(y_true, y_pred)),
         "f1": float(f1_score(y_true, y_pred)),
         "brier": float(brier_score_loss(y_true, proba_approve)),
+        "average_precision": float(average_precision_score(y_true, proba_approve)),
     }
     try:
         out["roc_auc"] = float(roc_auc_score(y_true, proba_approve))

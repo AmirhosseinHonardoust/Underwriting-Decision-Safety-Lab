@@ -49,6 +49,9 @@ jobs:
       - name: Verify expected outputs
         run: |
           test -f ci_outputs/metrics_overall.json
+          test -f ci_outputs/baseline_metrics.json
+          test -f ci_outputs/evaluation_summary.json
+          test -f ci_outputs/policy_variants.json
           test -f ci_outputs/coverage_curve.csv
           test -f ci_outputs/abstention_policy.json
           test -f ci_outputs/test_predictions.csv
@@ -58,6 +61,7 @@ jobs:
           test -f ci_figures/confusion_matrix.png
           test -f ci_figures/reliability_diagram.png
           test -f ci_figures/probability_histograms.png
+          test -f ci_figures/precision_recall_curve.png
           test -f ci_figures/coverage_vs_performance.png
 
       - name: Validate smoke output contracts
@@ -70,10 +74,13 @@ jobs:
 
           metrics = json.loads(Path("ci_outputs/metrics_overall.json").read_text())
           policy = json.loads(Path("ci_outputs/abstention_policy.json").read_text())
+          baselines = json.loads(Path("ci_outputs/baseline_metrics.json").read_text())
+          variants = json.loads(Path("ci_outputs/policy_variants.json").read_text())
+          summary = json.loads(Path("ci_outputs/evaluation_summary.json").read_text())
           predictions = pd.read_csv("ci_outputs/test_predictions.csv")
           coverage = pd.read_csv("ci_outputs/coverage_curve.csv")
 
-          required_metrics = {"accuracy", "f1", "brier", "roc_auc", "ece"}
+          required_metrics = {"accuracy", "f1", "brier", "roc_auc", "average_precision", "ece"}
           missing_metrics = required_metrics - set(metrics)
           if missing_metrics:
               raise AssertionError(f"Missing metrics: {missing_metrics}")
@@ -83,6 +90,9 @@ jobs:
 
           if not 0 <= metrics["ece"] <= 1:
               raise AssertionError("ECE should be between 0 and 1")
+
+          if not 0 <= metrics["average_precision"] <= 1:
+              raise AssertionError("Average precision should be between 0 and 1")
 
           required_policy = {
               "recommended_threshold",
@@ -104,6 +114,18 @@ jobs:
 
           if not coverage["coverage"].between(0, 1).all():
               raise AssertionError("Coverage values must be between 0 and 1")
+
+          required_baselines = {"majority_class", "empirical_prior", "stratified_random"}
+          if required_baselines - set(baselines):
+              raise AssertionError("Missing baseline metrics")
+
+          required_variants = {"target_coverage", "quality_first", "high_coverage", "balanced", "conservative_review"}
+          if required_variants - set(variants):
+              raise AssertionError("Missing policy variants")
+
+          for key in ["model_metrics", "baseline_metrics", "recommended_policy", "policy_variants"]:
+              if key not in summary:
+                  raise AssertionError(f"Missing evaluation summary key: {key}")
 
           print("Smoke output contracts OK")
           PY
