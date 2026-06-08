@@ -5,6 +5,8 @@ from typing import List
 
 import pandas as pd
 
+from .validation import validate_dataframe_structure
+
 
 TARGET_CANDIDATES = ["loan_approved", "approved", "LoanApproved", "target", "label"]
 
@@ -18,6 +20,7 @@ class DataSpec:
 
 
 def infer_spec(df: pd.DataFrame) -> DataSpec:
+    validate_dataframe_structure(df)
     cols = df.columns.tolist()
     target = None
     for c in TARGET_CANDIDATES:
@@ -37,7 +40,9 @@ def infer_spec(df: pd.DataFrame) -> DataSpec:
 
 
 def load_csv(path: str) -> pd.DataFrame:
-    return pd.read_csv(path)
+    df = pd.read_csv(path)
+    validate_dataframe_structure(df)
+    return df
 
 
 def basic_quality_report(df: pd.DataFrame, spec: DataSpec) -> dict:

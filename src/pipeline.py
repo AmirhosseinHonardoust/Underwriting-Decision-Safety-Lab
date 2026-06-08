@@ -13,6 +13,7 @@ from .abstention import coverage_curve, recommend_threshold
 from .calibration import calibrate, expected_calibration_error
 from .data import basic_quality_report, infer_spec, load_csv
 from .modeling import compute_binary_metrics, make_base_model, make_preprocessor, train_test_split_data
+from .validation import validate_underwriting_dataframe
 from .plots import (
     plot_confusion_matrix,
     plot_coverage_vs_performance,
@@ -36,6 +37,12 @@ def run(
 
     df = load_csv(input_path)
     spec = infer_spec(df)
+    validate_underwriting_dataframe(
+        df,
+        target=spec.target,
+        numeric_cols=spec.numeric_cols,
+        categorical_cols=spec.categorical_cols,
+    )
 
     df_model = df.drop(columns=spec.id_cols) if spec.id_cols else df.copy()
     split = train_test_split_data(df_model, spec.target, test_size=0.25, random_state=random_state)
