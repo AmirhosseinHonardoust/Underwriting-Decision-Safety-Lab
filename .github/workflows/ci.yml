@@ -1,0 +1,117 @@
+name: CI
+
+on:
+  push:
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  test-and-smoke:
+    name: Test and smoke workflow on Python ${{ matrix.python-version }}
+    runs-on: ubuntu-latest
+
+    strategy:
+      fail-fast: false
+      matrix:
+        python-version: ["3.10", "3.11", "3.12"]
+
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python-version }}
+          cache: "pip"
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+
+      - name: Check source files compile
+        run: |
+          python -m compileall src app tests
+
+      - name: Run unit tests
+        run: |
+          python -m unittest discover -s tests -v
+
+      - name: Run pipeline smoke workflow
+        run: |
+          python -m src.pipeline \
+            --input data/raw/loanapproval.csv \
+            --out-dir ci_outputs \
+            --figures-dir ci_figures \
+            --target-coverage 0.70
+
+      - name: Verify expected outputs
+        run: |
+          test -f ci_outputs/metrics_overall.json
+          test -f ci_outputs/coverage_curve.csv
+          test -f ci_outputs/abstention_policy.json
+          test -f ci_outputs/test_predictions.csv
+          test -f ci_outputs/model.joblib
+          test -f ci_outputs/policy_card.md
+          test -f ci_outputs/data_quality.json
+          test -f ci_figures/confusion_matrix.png
+          test -f ci_figures/reliability_diagram.png
+          test -f ci_figures/probability_histograms.png
+          test -f ci_figures/coverage_vs_performance.png
+
+      - name: Validate smoke output contracts
+        run: |
+          python - <<'PY'
+          import json
+          from pathlib import Path
+
+          import pandas as pd
+
+          metrics = json.loads(Path("ci_outputs/metrics_overall.json").read_text())
+          policy = json.loads(Path("ci_outputs/abstention_policy.json").read_text())
+          predictions = pd.read_csv("ci_outputs/test_predictions.csv")
+          coverage = pd.read_csv("ci_outputs/coverage_curve.csv")
+
+          required_metrics = {"accuracy", "f1", "brier", "roc_auc", "ece"}
+          missing_metrics = required_metrics - set(metrics)
+          if missing_metrics:
+              raise AssertionError(f"Missing metrics: {missing_metrics}")
+
+          if not 0 <= metrics["brier"] <= 1:
+              raise AssertionError("Brier score should be between 0 and 1")
+
+          if not 0 <= metrics["ece"] <= 1:
+              raise AssertionError("ECE should be between 0 and 1")
+
+          required_policy = {
+              "recommended_threshold",
+              "expected_coverage",
+              "expected_accuracy_auto",
+              "expected_f1_auto",
+          }
+          missing_policy = required_policy - set(policy)
+          if missing_policy:
+              raise AssertionError(f"Missing policy keys: {missing_policy}")
+
+          required_prediction_cols = {"p_approve", "p_reject", "confidence", "auto_decide"}
+          missing_cols = required_prediction_cols - set(predictions.columns)
+          if missing_cols:
+              raise AssertionError(f"Missing prediction columns: {missing_cols}")
+
+          if not predictions["p_approve"].between(0, 1).all():
+              raise AssertionError("p_approve must be between 0 and 1")
+
+          if not coverage["coverage"].between(0, 1).all():
+              raise AssertionError("Coverage values must be between 0 and 1")
+
+          print("Smoke output contracts OK")
+          PY
+
+      - name: Upload generated artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: underwriting-decision-safety-artifacts-python-${{ matrix.python-version }}
+          path: |
+            ci_outputs/
+            ci_figures/
