@@ -97,3 +97,57 @@ def plot_coverage_vs_performance(curve: pd.DataFrame, outpath: Path) -> None:
     plt.tight_layout()
     plt.savefig(outpath, dpi=180)
     plt.close(fig)
+
+
+def plot_slice_review_rates(slice_report: pd.DataFrame, outpath: Path, top_n: int = 12) -> None:
+    """Plot review rate by slice for the most populated slices."""
+    _ensure_dir(outpath.parent)
+
+    if slice_report.empty:
+        fig, ax = plt.subplots(figsize=(8, 4))
+        ax.text(0.5, 0.5, "No slice report available", ha="center", va="center")
+        ax.axis("off")
+        plt.tight_layout()
+        plt.savefig(outpath, dpi=180)
+        plt.close()
+        return
+
+    df = slice_report.copy()
+    df["label"] = df["slice_feature"].astype(str) + " = " + df["slice_value"].astype(str)
+    df = df.sort_values("n", ascending=False).head(top_n).sort_values("review_rate", ascending=True)
+
+    fig, ax = plt.subplots(figsize=(10, max(4, 0.42 * len(df))))
+    ax.barh(df["label"], df["review_rate"])
+    ax.set_xlabel("Review rate")
+    ax.set_title("Review Rate by Slice")
+    ax.set_xlim(0, 1)
+    plt.tight_layout()
+    plt.savefig(outpath, dpi=180)
+    plt.close()
+
+
+def plot_slice_error_rates(slice_report: pd.DataFrame, outpath: Path, top_n: int = 12) -> None:
+    """Plot error rate by slice for the most populated slices."""
+    _ensure_dir(outpath.parent)
+
+    if slice_report.empty:
+        fig, ax = plt.subplots(figsize=(8, 4))
+        ax.text(0.5, 0.5, "No slice report available", ha="center", va="center")
+        ax.axis("off")
+        plt.tight_layout()
+        plt.savefig(outpath, dpi=180)
+        plt.close()
+        return
+
+    df = slice_report.copy()
+    df["label"] = df["slice_feature"].astype(str) + " = " + df["slice_value"].astype(str)
+    df = df.sort_values("n", ascending=False).head(top_n).sort_values("error_rate", ascending=True)
+
+    fig, ax = plt.subplots(figsize=(10, max(4, 0.42 * len(df))))
+    ax.barh(df["label"], df["error_rate"])
+    ax.set_xlabel("Error rate")
+    ax.set_title("Error Rate by Slice")
+    ax.set_xlim(0, max(0.05, min(1.0, float(df["error_rate"].max()) * 1.2)))
+    plt.tight_layout()
+    plt.savefig(outpath, dpi=180)
+    plt.close()
