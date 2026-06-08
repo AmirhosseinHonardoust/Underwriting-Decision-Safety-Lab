@@ -5,7 +5,7 @@ from pathlib import Path
 import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
-from sklearn.metrics import ConfusionMatrixDisplay, confusion_matrix
+from sklearn.metrics import ConfusionMatrixDisplay, PrecisionRecallDisplay, average_precision_score, confusion_matrix, precision_recall_curve
 
 try:  # package import
     from .calibration import calibration_bins
@@ -64,6 +64,21 @@ def plot_probability_histograms(y_true: np.ndarray, p: np.ndarray, outpath: Path
     ax.set_ylabel("Count")
     ax.set_title("Probability Histograms (separation + confidence)")
     ax.legend()
+    plt.tight_layout()
+    plt.savefig(outpath, dpi=180)
+    plt.close(fig)
+
+
+def plot_precision_recall_curve(y_true: np.ndarray, p: np.ndarray, outpath: Path) -> None:
+    _ensure_dir(outpath.parent)
+
+    precision, recall, _ = precision_recall_curve(y_true, p)
+    average_precision = average_precision_score(y_true, p)
+
+    fig, ax = plt.subplots(figsize=(7.4, 5.6))
+    display = PrecisionRecallDisplay(precision=precision, recall=recall, average_precision=average_precision)
+    display.plot(ax=ax)
+    ax.set_title("Precision-Recall Curve (Approval Class)")
     plt.tight_layout()
     plt.savefig(outpath, dpi=180)
     plt.close(fig)
