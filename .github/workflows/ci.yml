@@ -52,6 +52,9 @@ jobs:
           test -f ci_outputs/baseline_metrics.json
           test -f ci_outputs/evaluation_summary.json
           test -f ci_outputs/policy_variants.json
+          test -f ci_outputs/slice_report.csv
+          test -f ci_outputs/slice_report.json
+          test -f ci_outputs/slice_summary.json
           test -f ci_outputs/coverage_curve.csv
           test -f ci_outputs/abstention_policy.json
           test -f ci_outputs/test_predictions.csv
@@ -63,6 +66,8 @@ jobs:
           test -f ci_figures/probability_histograms.png
           test -f ci_figures/precision_recall_curve.png
           test -f ci_figures/coverage_vs_performance.png
+          test -f ci_figures/slice_review_rates.png
+          test -f ci_figures/slice_error_rates.png
 
       - name: Validate smoke output contracts
         run: |
@@ -77,8 +82,10 @@ jobs:
           baselines = json.loads(Path("ci_outputs/baseline_metrics.json").read_text())
           variants = json.loads(Path("ci_outputs/policy_variants.json").read_text())
           summary = json.loads(Path("ci_outputs/evaluation_summary.json").read_text())
+          slice_summary = json.loads(Path("ci_outputs/slice_summary.json").read_text())
           predictions = pd.read_csv("ci_outputs/test_predictions.csv")
           coverage = pd.read_csv("ci_outputs/coverage_curve.csv")
+          slice_report = pd.read_csv("ci_outputs/slice_report.csv")
 
           required_metrics = {"accuracy", "f1", "brier", "roc_auc", "average_precision", "ece"}
           missing_metrics = required_metrics - set(metrics)
@@ -123,9 +130,20 @@ jobs:
           if required_variants - set(variants):
               raise AssertionError("Missing policy variants")
 
-          for key in ["model_metrics", "baseline_metrics", "recommended_policy", "policy_variants"]:
+          for key in ["model_metrics", "baseline_metrics", "recommended_policy", "policy_variants", "slice_summary", "slice_artifacts"]:
               if key not in summary:
                   raise AssertionError(f"Missing evaluation summary key: {key}")
+
+          required_slice_cols = {"slice_feature", "slice_value", "n", "review_rate", "error_rate", "ece"}
+          missing_slice_cols = required_slice_cols - set(slice_report.columns)
+          if missing_slice_cols:
+              raise AssertionError(f"Missing slice report columns: {missing_slice_cols}")
+
+          if slice_report.empty:
+              raise AssertionError("Slice report should not be empty")
+
+          if slice_summary.get("n_slices", 0) <= 0:
+              raise AssertionError("Slice summary should report at least one slice")
 
           print("Smoke output contracts OK")
           PY

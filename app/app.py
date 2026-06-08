@@ -12,6 +12,7 @@ PROJECT_ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(PROJECT_ROOT))
 
 from src.pipeline import run as run_pipeline  # noqa: E402
+from src.validation import DataValidationError  # noqa: E402
 
 
 def _img_tile(path: Path, caption: str, height_px: int = 340) -> None:
@@ -56,15 +57,19 @@ if uploaded is not None:
     effective_input = tmp
 
 if run_btn:
-    with st.spinner("Training + calibrating + evaluating..."):
-        run_pipeline(
-            input_path=str(effective_input),
-            out_dir=str(OUT_DIR),
-            figures_dir=str(FIG_DIR),
-            calibration_method=str(calibration),
-            recommend_target_coverage=float(target_cov),
-        )
-    st.success("✅ Done! Outputs regenerated.")
+    try:
+        with st.spinner("Training + calibrating + evaluating..."):
+            run_pipeline(
+                input_path=str(effective_input),
+                out_dir=str(OUT_DIR),
+                figures_dir=str(FIG_DIR),
+                calibration_method=str(calibration),
+                recommend_target_coverage=float(target_cov),
+            )
+        st.success("✅ Done! Outputs regenerated.")
+    except DataValidationError as exc:
+        st.error(f"Input validation failed: {exc}")
+        st.stop()
 
 metrics_path = OUT_DIR / "metrics_overall.json"
 policy_path = OUT_DIR / "abstention_policy.json"
@@ -83,8 +88,8 @@ preds = pd.read_csv(preds_path) if preds_path.exists() else pd.DataFrame()
 curve = pd.read_csv(curve_path) if curve_path.exists() else pd.DataFrame()
 dq = json.loads(dq_path.read_text(encoding="utf-8")) if dq_path.exists() else {}
 
-tab_report, tab_curve, tab_triage, tab_quality, tab_notes = st.tabs(
-    ["Report Card", "Coverage Curve", "Triage UI", "Data Quality", "Notes"]
+tab_report, tab_curve, tab_triage, tab_slices, tab_quality, tab_notes = st.tabs(
+    ["Report Card", "Coverage Curve", "Triage UI", "Slice Safety", "Data Quality", "Notes"]
 )
 
 with tab_report:
@@ -205,6 +210,35 @@ with tab_triage:
         )
 
         st.caption(f"Rule: confidence = max(p, 1-p). Review when confidence < {thr:.2f}.")
+
+
+with tab_slices:
+    st.subheader("Slice safety report")
+    st.caption("Review rate, error rate, and calibration diagnostics by applicant slices. These are monitoring diagnostics, not fairness certification.")
+
+    slice_report_path = OUT_DIR / "slice_report.csv"
+    slice_summary_path = OUT_DIR / "slice_summary.json"
+
+    if slice_summary_path.exists():
+        slice_summary = json.loads(slice_summary_path.read_text(encoding="utf-8"))
+        s1, s2, s3, s4 = st.columns(4)
+        s1.metric("Slices", int(slice_summary.get("n_slices", 0)))
+        s2.metric("Auto-rate gap", f'{slice_summary.get("max_auto_decision_rate_gap", float("nan")):.3f}')
+        s3.metric("Error-rate gap", f'{slice_summary.get("max_error_rate_gap", float("nan")):.3f}')
+        s4.metric("Small slices", int(slice_summary.get("small_slice_count", 0)))
+
+    if slice_report_path.exists():
+        slice_df = pd.read_csv(slice_report_path)
+        st.dataframe(slice_df, width="stretch")
+
+        st.subheader("Slice figures")
+        sfig1, sfig2 = st.columns(2, gap="large")
+        with sfig1:
+            _img_tile(FIG_DIR / "slice_review_rates.png", "Review rate by slice", height_px=fig_height)
+        with sfig2:
+            _img_tile(FIG_DIR / "slice_error_rates.png", "Error rate by slice", height_px=fig_height)
+    else:
+        st.info("Slice report not found. Run the pipeline to generate slice safety artifacts.")
 
 with tab_quality:
     st.subheader("Data quality (quick checks)")

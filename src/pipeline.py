@@ -12,6 +12,7 @@ from sklearn.pipeline import Pipeline
 from .abstention import coverage_curve, recommend_threshold
 from .calibration import calibrate, expected_calibration_error
 from .evaluation import compute_baseline_metrics, select_policy_variants
+from .slices import build_slice_report, save_slice_artifacts, summarize_slice_report
 from .data import basic_quality_report, infer_spec, load_csv
 from .modeling import compute_binary_metrics, make_base_model, make_preprocessor, train_test_split_data
 from .validation import validate_underwriting_dataframe
@@ -21,6 +22,8 @@ from .plots import (
     plot_probability_histograms,
     plot_precision_recall_curve,
     plot_reliability_diagram,
+    plot_slice_error_rates,
+    plot_slice_review_rates,
 )
 
 
@@ -78,14 +81,6 @@ def run(
     curve.to_csv(out_dir_p / "coverage_curve.csv", index=False)
     (out_dir_p / "abstention_policy.json").write_text(json.dumps(policy, indent=2), encoding="utf-8")
 
-    evaluation_summary = {
-        "model_metrics": metrics,
-        "baseline_metrics": baseline_metrics,
-        "recommended_policy": policy,
-        "policy_variants": policy_variants,
-    }
-    (out_dir_p / "evaluation_summary.json").write_text(json.dumps(evaluation_summary, indent=2), encoding="utf-8")
-
     preds = split.X_test.copy()
     preds["y_true"] = split.y_test
     preds["p_approve"] = p_test
@@ -94,6 +89,20 @@ def run(
     preds["confidence"] = np.maximum(p_test, 1.0 - p_test)
     preds["auto_decide"] = preds["confidence"] >= float(policy["recommended_threshold"])
     preds.to_csv(out_dir_p / "test_predictions.csv", index=False)
+
+    slice_report = build_slice_report(preds)
+    slice_paths = save_slice_artifacts(slice_report, out_dir_p)
+    slice_summary = summarize_slice_report(slice_report)
+
+    evaluation_summary = {
+        "model_metrics": metrics,
+        "baseline_metrics": baseline_metrics,
+        "recommended_policy": policy,
+        "policy_variants": policy_variants,
+        "slice_summary": slice_summary,
+        "slice_artifacts": {key: str(path) for key, path in slice_paths.items()},
+    }
+    (out_dir_p / "evaluation_summary.json").write_text(json.dumps(evaluation_summary, indent=2), encoding="utf-8")
 
     joblib.dump({"model": cal, "spec": spec.__dict__}, out_dir_p / "model.joblib")
 
@@ -133,11 +142,13 @@ Use a calibrated model to approve/reject automatically when confident; otherwise
     plot_probability_histograms(split.y_test, p_test, fig_dir_p / "probability_histograms.png")
     plot_precision_recall_curve(split.y_test, p_test, fig_dir_p / "precision_recall_curve.png")
     plot_coverage_vs_performance(curve, fig_dir_p / "coverage_vs_performance.png")
+    plot_slice_review_rates(slice_report, fig_dir_p / "slice_review_rates.png")
+    plot_slice_error_rates(slice_report, fig_dir_p / "slice_error_rates.png")
 
     dq = basic_quality_report(df, spec)
     (out_dir_p / "data_quality.json").write_text(json.dumps(dq, indent=2), encoding="utf-8")
 
-    return {"metrics": metrics, "policy": policy, "baseline_metrics": baseline_metrics, "policy_variants": policy_variants, "outputs_dir": str(out_dir_p), "figures_dir": str(fig_dir_p)}
+    return {"metrics": metrics, "policy": policy, "baseline_metrics": baseline_metrics, "policy_variants": policy_variants, "slice_summary": slice_summary, "outputs_dir": str(out_dir_p), "figures_dir": str(fig_dir_p)}
 
 
 def main() -> None:
