@@ -2,146 +2,257 @@
 
 # Underwriting Decision Safety Lab
 
-**Calibration + abstention + decision-safe policy UI for loan approval.**  
-Turn model scores into **actions you can defend**: *auto-approve / auto-reject / send-to-review*.
+![Python](https://img.shields.io/badge/Python-3.10%2B-blue)
+![scikit-learn](https://img.shields.io/badge/scikit--learn-Decision%20Safety-green)
+![Calibration](https://img.shields.io/badge/Calibration-Probability%20Quality-orange)
+![Streamlit](https://img.shields.io/badge/Streamlit-Dashboard-red)
+![Status](https://img.shields.io/badge/Status-Portfolio%20MVP-purple)
+[![CI](https://github.com/AmirhosseinHonardoust/Underwriting-Decision-Safety-Lab/actions/workflows/ci.yml/badge.svg?branch=main)](https://github.com/AmirhosseinHonardoust/Underwriting-Decision-Safety-Lab/actions/workflows/ci.yml)
 
-<img alt="Python" src="https://img.shields.io/badge/Python-3.9%2B-blue" />
-<img alt="Streamlit" src="https://img.shields.io/badge/Streamlit-App-FF4B4B" />
-<img alt="scikit-learn" src="https://img.shields.io/badge/scikit--learn-ML-F7931E" />
-<img alt="pandas" src="https://img.shields.io/badge/pandas-Data%20Frames-150458" />
-<img alt="License" src="https://img.shields.io/badge/License-MIT-green" />
-<img alt="Status" src="https://img.shields.io/badge/Status-Research%20Prototype-yellow" />
- 
 </div>
- 
----
 
-## Why this repo exists
-     
-Most ML projects stop at **“here’s the AUC”**. Underwriting can’t.
+A production-minded underwriting decision-safety workflow for turning loan-approval model scores into **calibrated probabilities**, **abstention policies**, **coverage-quality tradeoffs**, **slice safety diagnostics**, and **human-review decisions**.
 
-In lending, a prediction is only useful if it can be turned into a *decision policy* with:
-- **Calibrated probabilities** (a “0.90 approve” should mean ~90% approval correctness under similar conditions)
-- **Abstention** (a *review* path for uncertain cases)
-- **Coverage tradeoffs** (how many cases you can safely auto-decide without breaking quality)
-- **Decision-safe UI** (so the user sees confidence + what rule triggered the outcome)
-
-This lab implements a full, end-to-end workflow:
-1. Train a baseline loan approval model
-2. Calibrate predicted probabilities
-3. Build a **coverage frontier** (threshold ↔ auto-decision rate ↔ quality)
-4. Recommend a **defensible threshold policy**
-5. Provide an interactive Streamlit app for **triage** + **reporting**
-
-> **Disclaimer:** This is a data science lab / portfolio project. It is not financial advice and not a production underwriting system.
+> **Important:** This project is a **portfolio and research demo**, not a production underwriting or credit-decision system.
+>
+> The model, thresholds, policy variants, and slice reports are designed to demonstrate a professional decision-safety workflow. They should not be used for real lending, credit approval, or automated financial decisions without legal, compliance, fairness, security, and domain review.
 
 ---
 
-## What you get
+## Table of Contents
 
-### Pipeline outputs
-- `outputs/metrics_overall.json` | model metrics on the test split (accuracy, F1, ROC-AUC, ECE, Brier, …)
-- `outputs/abstention_policy.json` | recommended threshold + expected coverage + expected “auto” quality
-- `outputs/test_predictions.csv` | per-row probabilities + labels (used by the triage UI)
-- `outputs/coverage_curve.csv` | threshold sweep results (coverage vs performance)
-
-### Figures
-Placed in `reports/figures/`:
-
-- Confusion Matrix (baseline threshold)
-- Coverage vs Performance (abstention tradeoff)
-- Probability Histograms (separation + confidence)
-- Reliability Diagram (calibration)
-
-### Streamlit dashboard
-Tabs:
-- **Report Card**
-- **Coverage Curve**
-- **Triage UI**
-- **Data Quality**
-- **Notes**
- 
----
-
-## Dataset
-
-This lab uses Kaggle’s **Loan Approval Dataset** (`loanapproval.csv`).  
-Key columns (as shown in the Data Quality tab):
-
-- `applicant_id` (unique ID)
-- `age` (numeric)
-- `gender` (categorical)
-- `marital_status` (categorical)
-- `annual_income` (numeric)
-- `loan_amount` (numeric)
-- `credit_score` (numeric)
-- `num_dependents` (numeric)
-- `existing_loans_count` (numeric)
-- `employment_status` (categorical)
-- `loan_approved` (target, 0/1)
-
-### Quick sanity check (what the Data Quality screen shows)
-- **Rows:** 1000  
-- **Columns:** 11  
-- **Missingness:** 0 in all columns (in this dataset snapshot)
-- **Target balance:** approval is majority (typical of curated demo datasets)
-
-> Even if missingness is 0 here, the Data Quality tab is important: underwriting models are extremely sensitive to *quiet schema drift* (new employment types, score ranges shifting, etc).
+- [Project Overview](#project-overview)
+- [What This Project Does](#what-this-project-does)
+- [What This Project Does Not Do](#what-this-project-does-not-do)
+- [Key Features](#key-features)
+- [System Workflow](#system-workflow)
+- [Project Structure](#project-structure)
+- [Installation](#installation)
+- [Quick Start](#quick-start)
+- [Training and Evaluation](#training-and-evaluation)
+- [Abstention and Policy Variants](#abstention-and-policy-variants)
+- [Slice Safety Reporting](#slice-safety-reporting)
+- [Streamlit Dashboard](#streamlit-dashboard)
+- [Evaluation Metrics](#evaluation-metrics)
+- [Visual Reports](#visual-reports)
+- [Testing and CI](#testing-and-ci)
+- [Code Quality](#code-quality)
+- [Limitations](#limitations)
+- [Responsible Use](#responsible-use)
+- [Future Improvements](#future-improvements)
+- [Tech Stack](#tech-stack)
+- [Author](#author)
+- [License](#license)
 
 ---
 
-## Project structure
+## Project Overview
 
+Underwriting is not only a classification problem. In a real decision workflow, a model score is useful only if it can support a defensible action:
+
+- approve automatically
+- reject automatically
+- route uncertain cases to human review
+- monitor decision quality across applicant slices
+- communicate uncertainty and limitations clearly
+
+This project demonstrates an end-to-end underwriting decision-safety workflow using a loan-approval dataset. It includes data validation, model training, calibrated probability estimation, abstention policy selection, policy variants, slice-level safety reporting, visual diagnostics, and a Streamlit dashboard for triage and review.
+
+The goal is to show how a loan-approval model can be turned into a **decision-support system**, not just a single accuracy or AUC score.
+
+---
+
+## What This Project Does
+
+This project can:
+
+- Load and validate a loan-approval CSV dataset
+- Train a calibrated loan-approval model using a scikit-learn pipeline
+- Evaluate accuracy, F1, ROC-AUC, PR-AUC, Brier score, and ECE
+- Compare the model against simple baselines
+- Build a coverage curve for abstention-based decision safety
+- Recommend a threshold for auto-decision versus review routing
+- Generate multiple policy variants for different review strategies
+- Produce test predictions with confidence and review routing
+- Generate data-quality diagnostics
+- Generate slice-level safety reports across applicant groups
+- Visualize reliability, probability distributions, coverage tradeoffs, and slice diagnostics
+- Save model and policy artifacts
+- Provide a Streamlit dashboard for report review and triage
+- Run automated tests and CI smoke workflows
+
+---
+
+## What This Project Does Not Do
+
+This project does **not**:
+
+- Make real credit decisions
+- Provide financial, legal, or lending advice
+- Guarantee fairness, compliance, or deployability
+- Replace underwriters, compliance teams, or model-risk review
+- Use a production lending dataset
+- Provide real-time underwriting infrastructure
+- Include live monitoring, drift detection, or retraining automation
+- Certify that the model is safe for high-stakes deployment
+
+A production underwriting system would need stronger governance, access control, audit logging, fairness review, monitoring, adverse-action compliance, explainability review, and expert validation.
+
+---
+
+## Key Features
+
+- **Calibrated probability model** for loan approval decisions
+- **Corrected Expected Calibration Error** based on observed positive-class rate
+- **Reliability diagram** for probability-quality inspection
+- **Abstention policy** to route uncertain cases to human review
+- **Coverage-quality curve** for automation tradeoff analysis
+- **Policy variants** for target coverage, quality-first, high-coverage, balanced, and conservative-review strategies
+- **Baseline comparisons** for majority, empirical-prior, and stratified-random strategies
+- **PR-AUC and Brier score** for probability and imbalanced-decision evaluation
+- **Data validation** for schema, target, numeric features, categorical features, and underwriting plausibility checks
+- **Slice safety reporting** for review rate, error rate, calibration, and auto-decision behavior across applicant groups
+- **Streamlit dashboard** for report card, coverage, triage, data quality, and slice safety review
+- **Unit tests and GitHub Actions CI**
+- **Generated outputs and visual reports** for reproducible review
+
+---
+
+## System Workflow
+
+```text
+Loan approval dataset
+        ↓
+Data validation and quality checks
+        ↓
+Train/test split
+        ↓
+Preprocessing + calibrated model pipeline
+        ↓
+Probability metrics and baseline comparisons
+        ↓
+Coverage curve and abstention policy
+        ↓
+Policy variants and decision-support artifacts
+        ↓
+Slice safety reporting
+        ↓
+Dashboard triage and review
 ```
 
-underwriting-decision-safety-lab/
-├─ app/
-│  └─ app.py                    # Streamlit dashboard
-├─ data/
-│  └─ raw/
-│     └─ loanapproval.csv
-├─ outputs/                     # generated JSON/CSV artifacts
-├─ reports/
-│  └─ figures/                  # generated PNG charts
-└─ src/
-   ├─ pipeline.py               # main pipeline entrypoint
-   ├─ clean.py                  # cleaning + schema normalization
-   ├─ train.py                  # model training
-   ├─ calibrate.py              # sigmoid/isotonic calibration
-   ├─ abstention.py             # threshold sweep + policy recommendation
-   ├─ metrics.py                # ECE/Brier/etc
-   └─ plots.py                  # figure generation
+---
 
-````
+## Project Structure
+
+```text
+Underwriting-Decision-Safety-Lab/
+│
+├── .github/
+│   └── workflows/
+│       └── ci.yml
+│
+├── app/
+│   └── app.py
+│
+├── data/
+│   └── raw/
+│       └── loanapproval.csv
+│
+├── outputs/
+│   ├── abstention_policy.json
+│   ├── baseline_metrics.json
+│   ├── coverage_curve.csv
+│   ├── data_quality.json
+│   ├── evaluation_summary.json
+│   ├── metrics_overall.json
+│   ├── model.joblib
+│   ├── policy_card.md
+│   ├── policy_variants.json
+│   ├── slice_report.csv
+│   ├── slice_report.json
+│   ├── slice_summary.json
+│   └── test_predictions.csv
+│
+├── reports/
+│   └── figures/
+│       ├── confusion_matrix.png
+│       ├── coverage_vs_performance.png
+│       ├── precision_recall_curve.png
+│       ├── probability_histograms.png
+│       ├── reliability_diagram.png
+│       ├── slice_error_rates.png
+│       └── slice_review_rates.png
+│
+├── src/
+│   ├── abstention.py
+│   ├── calibration.py
+│   ├── data.py
+│   ├── evaluation.py
+│   ├── modeling.py
+│   ├── pipeline.py
+│   ├── plots.py
+│   ├── policy.py
+│   ├── quality.py
+│   ├── slices.py
+│   └── validation.py
+│
+├── tests/
+│   ├── test_calibration.py
+│   ├── test_evaluation_improvements.py
+│   ├── test_pipeline_contracts.py
+│   ├── test_project_integrity.py
+│   ├── test_slice_reporting.py
+│   └── test_validation.py
+│
+├── README.md
+├── requirements.txt
+└── LICENSE
+```
 
 ---
 
-## How to run
+## Installation
 
-### 1) Create environment
+### 1. Clone the Repository
+
+```bash
+git clone https://github.com/AmirhosseinHonardoust/Underwriting-Decision-Safety-Lab.git
+cd Underwriting-Decision-Safety-Lab
+```
+
+### 2. Create a Virtual Environment
+
+On Windows CMD:
+
+```cmd
+python -m venv .venv
+.venv\Scripts\activate
+```
+
+On macOS/Linux:
+
 ```bash
 python -m venv .venv
-# Windows:
-.venv\Scripts\activate
-# macOS/Linux:
 source .venv/bin/activate
-
-pip install -r requirements.txt
-````
-
-### 2) Run the pipeline (generates outputs + figures)
-
-```bash
-python -m src.pipeline --input data/raw/loanapproval.csv
 ```
 
-You should see something like:
+### 3. Install Requirements
 
-* Done!
-* Outputs: `outputs/`
-* Figures: `reports/figures/`
+```bash
+pip install -r requirements.txt
+```
 
-### 3) Launch the Streamlit app
+---
+
+## Quick Start
+
+Run the full local workflow:
+
+```bash
+python -m src.pipeline --input data/raw/loanapproval.csv --target-coverage 0.70
+```
+
+Launch the dashboard:
 
 ```bash
 streamlit run app/app.py
@@ -149,373 +260,397 @@ streamlit run app/app.py
 
 ---
 
-## Dashboard tour (screens + “how to read it”)
+## Training and Evaluation
 
-Below are the dashboard screens you shared. Each section explains:
+The main pipeline trains the underwriting model, calibrates probabilities, evaluates the model, generates coverage and policy artifacts, and writes figures.
 
-* what the screen is answering
-* how to interpret the results
-* what actions you can take next
+```bash
+python -m src.pipeline \
+  --input data/raw/loanapproval.csv \
+  --out-dir outputs \
+  --figures-dir reports/figures \
+  --target-coverage 0.70
+```
 
----
+Generated evaluation outputs include:
 
-# 1) Report Card tab
-
-**Goal:** Answer “Is the model *good enough* to consider auto-decisions and what’s the safe default policy?”
-
-### What you see
-
-* Top-level test metrics: **Accuracy, F1, ROC-AUC, ECE, Brier**
-* A **recommended abstention policy** (threshold and expected coverage)
-* A 2×2 figure grid:
-
-  * Confusion matrix
-  * Reliability diagram
-  * Coverage vs performance
-  * Probability histograms
-  
-<img width="1698" height="895" alt="Screenshot 2026-02-20 at 13-25-28 Underwriting Decision Safety Lab" src="https://github.com/user-attachments/assets/085df6b5-5f59-48e3-a2be-2b0d2647fddc" />
-
----
-
-## Metrics explained (with underwriting meaning)
-
-### Accuracy
-
-“How often do we predict correctly overall?”
-**Why it’s not enough:** A model can be accurate but dangerously overconfident.
-
-### F1
-
-Balances precision and recall (especially useful when class imbalance exists).
-**Underwriting interpretation:** Helps you avoid “approve everything” or “reject everything” behavior.
-
-### ROC-AUC
-
-Ranking quality: “Do approved cases generally get higher scores than rejected cases?”
-**Underwriting interpretation:** Strong AUC helps, but it doesn’t guarantee good threshold decisions.
-
-### ECE (Expected Calibration Error)
-
-Measures how far confidence deviates from reality across probability bins.
-
-* If the model says ~0.8 approval 100 times, about 80 of them should actually be approved.
-* High ECE means probabilities are not trustworthy without calibration.
-
-### Brier score
-
-Mean squared error of probabilistic predictions.
-
-* Lower is better.
-* Penalizes confident wrong predictions heavily.
+```text
+outputs/metrics_overall.json
+outputs/baseline_metrics.json
+outputs/evaluation_summary.json
+outputs/coverage_curve.csv
+outputs/abstention_policy.json
+outputs/policy_variants.json
+outputs/test_predictions.csv
+outputs/model.joblib
+reports/figures/reliability_diagram.png
+reports/figures/precision_recall_curve.png
+reports/figures/coverage_vs_performance.png
+reports/figures/confusion_matrix.png
+```
 
 ---
 
-# 2) Confusion matrix figure
+## Abstention and Policy Variants
 
-<img width="1224" height="1044" alt="confusion_matrix" src="https://github.com/user-attachments/assets/16e2fbc5-2f85-4074-b64e-69049eaec957" />
+A model does not need to auto-decide every application. This project uses an abstention policy to route uncertain applications to review.
 
-### What it answers
+The recommended policy is saved in:
 
-“At a baseline threshold (often 0.5), what kinds of mistakes are we making?”
+```text
+outputs/abstention_policy.json
+```
 
-### How to read it
+Example recommended policy from the included run:
 
-* Rows = true label
-* Columns = predicted label
-* Diagonal = correct predictions
-* Off-diagonals = errors:
+<div align="center">
 
-  * **False approvals** (predict approve but actually reject), risk/credit loss
-  * **False rejections** (predict reject but actually approve), opportunity cost/customer friction
+| Field | Value |
+|---|---|
+| Recommended threshold | 0.852 |
+| Expected auto-decision coverage | 0.696 |
+| Expected auto-decision accuracy | 0.977 |
+| Expected auto-decision F1 | 0.986 |
+| Target coverage | 0.700 |
 
-### Why it’s only the starting point
+</div>
 
-Underwriting typically *does not* operate at a single fixed threshold.
-The point of this repo is to move from “0.5 classifier” → **policy**:
+Policy variants are saved in:
 
-* conservative auto-approves
-* conservative auto-rejects
-* everything else → review
+```text
+outputs/policy_variants.json
+```
 
----
+Policy variants include:
 
-# 3) Reliability diagram (Calibration)
+<div align="center">
 
-<img width="1296" height="1080" alt="reliability_diagram" src="https://github.com/user-attachments/assets/a428d1a2-d31e-42fa-83c3-98a285ca27bf" />
+| Policy | Purpose |
+|---|---|
+| `target_coverage` | Chooses the threshold closest to the requested auto-decision coverage |
+| `quality_first` | Prioritizes very high auto-decision quality with lower coverage |
+| `high_coverage` | Maximizes automation coverage while accepting lower quality |
+| `balanced` | Balances auto-decision accuracy and F1 |
+| `conservative_review` | Sends more applications to review by requiring very high confidence |
 
-### What it answers
+</div>
 
-“Can we trust predicted probabilities as probabilities?”
-
-### How to read it
-
-* X-axis: predicted probability (binned)
-* Y-axis: observed accuracy / empirical frequency
-* The diagonal line = perfect calibration
-
-  * points above line: underconfident (reality > confidence)
-  * points below line: overconfident (confidence > reality)
-
-### Why calibration is critical here
-
-Abstention rules depend on confidence thresholds like:
-
-* auto-decide only if confidence ≥ 0.85
-  If probabilities are miscalibrated, “0.85” is not meaningful.
-
-### What good looks like
-
-* Points close to diagonal across mid-to-high probability regions
-* Especially important near the decision threshold you’ll deploy
+> These policies are decision-support artifacts, not automated lending rules.
 
 ---
 
-# 4) Probability histograms (separation + confidence)
+## Slice Safety Reporting
 
-<img width="1404" height="1007" alt="probability_histograms" src="https://github.com/user-attachments/assets/6403ca2a-c072-4d18-8277-c37f04d85304" />
+The project generates slice-level diagnostics to help inspect whether review rates, error rates, and calibration differ across applicant groups.
 
-### What it answers
+Slice artifacts are saved in:
 
-“Does the model separate approvals from rejections and where does uncertainty live?”
+```text
+outputs/slice_report.csv
+outputs/slice_report.json
+outputs/slice_summary.json
+```
 
-### How to read it
+The slice report includes diagnostics such as:
 
-* Two overlapping histograms:
+<div align="center">
 
-  * Approved (y=1)
-  * Rejected (y=0)
-* If distributions are well-separated, the model can confidently auto-decide more cases.
-* If they overlap heavily near the middle, you’ll need more abstention/review.
+| Diagnostic | Meaning |
+|---|---|
+| Observed approval rate | Actual approval rate inside a slice |
+| Mean predicted approval probability | Average model score for the slice |
+| Auto-decision rate | Share of cases auto-decided by the policy |
+| Review rate | Share of cases routed to review |
+| Auto-decision accuracy | Accuracy among auto-decided cases |
+| Error rate | Overall slice error rate |
+| False approval rate | Rejected cases incorrectly predicted as approved |
+| False rejection rate | Approved cases incorrectly predicted as rejected |
+| ECE by slice | Calibration error within the slice when enough rows exist |
 
-### Underwriting insights you can pull from this
+</div>
 
-* A large mass near **1.0** for approvals suggests strong “safe approve” region.
-* A spread-out rejection distribution suggests rejections are harder to identify or less consistent.
-* The overlap zone is your review queue candidate.
+Example slice summary from the included run:
 
----
+<div align="center">
 
-# 5) Coverage vs Performance (Abstention tradeoff)
+| Metric | Value |
+|---|---|
+| Number of slices | 20 |
+| Max auto-decision-rate gap | 0.381 |
+| Max error-rate gap | 0.145 |
+| Max ECE gap | 0.087 |
+| Small-slice count | 0 |
 
-<img width="1404" height="1007" alt="coverage_vs_performance" src="https://github.com/user-attachments/assets/fb255814-1433-44c5-92ad-a61258abd426" />
+</div>
 
-### What it answers
-
-“How much quality do we gain if we abstain more?”
-
-### Definitions
-
-* **Coverage:** fraction of cases the system auto-decides
-* **Auto-performance:** accuracy/F1 measured only on auto-decided cases
-* As threshold increases:
-
-  * coverage usually decreases
-  * auto-quality usually increases
-
-### How to use it (practical workflow)
-
-1. Decide a target coverage (e.g., 70% auto-decide)
-2. Choose the confidence threshold that achieves it
-3. Verify auto-quality is acceptable
-4. Review queue size becomes (1 - coverage)
-
-### Common trap
-
-High auto-accuracy is easy if you abstain on everything difficult.
-So you must always report **both coverage + quality** together.
+> Slice diagnostics are monitoring and review tools, not fairness certification.
 
 ---
 
-# 6) Coverage Curve tab
+## Streamlit Dashboard
 
-**Goal:** Make the coverage frontier interactive and easy to inspect.
+Launch the app:
 
-<img width="1694" height="747" alt="Screenshot 2026-02-20 at 13-25-42 Underwriting Decision Safety Lab" src="https://github.com/user-attachments/assets/3415238e-0f1f-4a9c-9c4f-56992d6b95c8" />
+```bash
+streamlit run app/app.py
+```
 
-### What you’re typically looking for
+The dashboard includes tabs for:
 
-* A “knee” in the curve: a region where a small reduction in coverage buys a big jump in quality
-* Stability: avoid thresholds where tiny changes cause big swings
-* A defensible operating point:
+- report card
+- coverage curve
+- triage UI
+- data quality
+- slice safety
+- notes and limitations
 
-  * “At threshold 0.85 we auto-decide ~70% with ~0.98 auto-accuracy”
+The dashboard helps review:
 
----
-
-# 7) Triage UI tab (Decision-safe demo)
-
-**Goal:** Show *how an underwriter or analyst would experience the model*.
-
-<img width="1707" height="838" alt="Screenshot 2026-02-20 at 13-25-58 Underwriting Decision Safety Lab" src="https://github.com/user-attachments/assets/e5bbdd15-3783-4e47-98e0-83f8e4afb17a" />
-
-### What it does
-
-* You enter applicant features (age, income, loan amount, credit score, etc.)
-* The app outputs:
-
-  * `p(approve)`
-  * a confidence measure (often max probability or margin)
-  * a decision: **AUTO-DECIDE** or **REVIEW**
-  * a bar chart of class probabilities
-
-### The decision-safe rule (core concept)
-
-Instead of saying “approve” because p=0.71, the UI says:
-
-* **AUTO-DECIDE** when confidence ≥ threshold
-* **REVIEW** otherwise
-
-This makes the system defensible:
-
-* you can explain what confidence threshold you chose
-* you can estimate workload (review volume)
-* you can monitor drift (coverage changing over time)
-
-### Why this is better than raw predictions
-
-A raw probability without a policy invites misuse:
-
-* different teams interpret it differently
-* thresholds get chosen ad hoc
-* you lose traceability for “why was this decision made?”
+- overall model quality
+- calibration behavior
+- coverage versus performance
+- recommended policy threshold
+- applicant-level review routing
+- data-quality checks
+- slice-level review and error patterns
 
 ---
 
-# 8) Data Quality tab (Quick checks)
+## Evaluation Metrics
 
-**Goal:** Catch problems before you trust metrics.
+The evaluation layer includes metrics designed for calibrated underwriting decision workflows.
 
-<img width="475" height="891" alt="Screenshot 2026-02-20 at 13-26-15 Underwriting Decision Safety Lab" src="https://github.com/user-attachments/assets/0b503770-0fc8-4e24-9eab-e1220722a43b" />
+<div align="center">
 
-### What this tab should include (and why)
+| Metric | Why it matters |
+|---|---|
+| Accuracy | Overall decision correctness at the default decision rule |
+| F1 | Balance between positive-class precision and recall |
+| ROC-AUC | Ranking quality across thresholds |
+| Average precision / PR-AUC | Useful for positive-class ranking quality |
+| Brier score | Measures probability quality |
+| ECE | Measures calibration error between predicted probability and observed approval rate |
+| Coverage | Share of applications auto-decided instead of reviewed |
+| Auto-decision accuracy | Accuracy on the subset the policy auto-decides |
 
-Even in clean demo datasets, underwriting systems in the wild break due to:
+</div>
 
-#### Missingness drift
+Example results from the included run:
 
-* income missing for a new channel
-* employment status missing for a partner integration
+<div align="center">
 
-#### Plausibility violations
+| Metric | Example value |
+|---|---|
+| Accuracy | 0.892 |
+| F1 | 0.927 |
+| ROC-AUC | 0.949 |
+| Average precision / PR-AUC | 0.981 |
+| Brier score | 0.080 |
+| ECE | 0.051 |
+| Recommended coverage | 0.696 |
+| Auto-decision accuracy | 0.977 |
 
-* credit scores outside expected range
-* negative loan amounts
-* impossible ages
+</div>
 
-#### Category drift
-
-* new `employment_status` values
-* changes in marital status encoding
-
-### Why this matters for decision safety
-
-A policy like “auto-decide above 0.85” assumes your feature distribution is similar to training.
-Data quality checks are the “trust gate” before policy application.
-
----
-
-# 9) Notes tab (Interpretation + production guidance)
-
-<img width="575" height="402" alt="Screenshot 2026-02-20 at 13-26-21 Underwriting Decision Safety Lab" src="https://github.com/user-attachments/assets/8b062c56-6408-405d-b8ed-c9b9b29fbd05" />
-
-### The important message
-
-* **Accuracy ≠ trust**
-* **ECE is calibration error**
-* **Coverage is a product metric** (review queue size is not free)
-
-### What “production-grade” means here
-
-A real system should add:
-
-* fairness slice audits (calibration + error rates by gender/age/employment)
-* monitoring: score drift, approval-rate drift, coverage drift
-* cost-aware policy: false approvals vs false rejections vs review cost
-* retraining triggers when calibration degrades
+> These values are from a demo dataset and should not be interpreted as real-world underwriting performance.
 
 ---
 
-## Recommended abstention policy (what it means)
+## Visual Reports
 
-The app shows a recommended policy (example from your report card screen):
+### Model evaluation charts
 
-* **Threshold (confidence):** 0.85
-* **Expected coverage:** 0.70
-* **Auto accuracy:** 0.977
-* **Auto F1:** 0.986
+<div align="center">
 
-Interpretation:
+| Reliability Diagram | Precision-Recall Curve |
+|---|---|
+| ![Reliability diagram](reports/figures/reliability_diagram.png) | ![Precision-recall curve](reports/figures/precision_recall_curve.png) |
+| **Analysis:** The reliability diagram compares predicted approval probabilities against observed approval rates. This matters because underwriting policies depend on calibrated probabilities, not only ranking quality. | **Analysis:** The precision-recall curve helps inspect positive-class performance and complements ROC-AUC when approval/rejection classes are not equally important. |
 
-* The system auto-decides ~70% of applicants.
-* The remaining ~30% go to human review.
-* Auto-decided cases are high-confidence, so quality is high.
-* This is **not “cheating”**, it is a conscious design decision that turns ML into a safe workflow.
+</div>
 
----
+### Coverage and decision behavior
 
-## How to extend this lab
+<div align="center">
 
-### 1) Two-sided policy (approve + reject + review)
+| Coverage vs Performance | Probability Histograms |
+|---|---|
+| ![Coverage vs performance](reports/figures/coverage_vs_performance.png) | ![Probability histograms](reports/figures/probability_histograms.png) |
+| **Analysis:** The coverage curve shows the tradeoff between automation rate and quality. Higher thresholds route more cases to review but improve the reliability of auto-decisions. | **Analysis:** Probability histograms show how approval and rejection cases are distributed across model scores, helping diagnose separation and uncertainty. |
 
-Right now, many prototypes use one confidence threshold. Underwriting often benefits from:
+</div>
 
-* auto-approve if p(approve) ≥ T_approve
-* auto-reject if p(approve) ≤ T_reject
-* else review
+### Slice safety charts
 
-This reduces review load while controlling risk.
+<div align="center">
 
-### 2) Cost-aware optimization
+| Slice Review Rates | Slice Error Rates |
+|---|---|
+| ![Slice review rates](reports/figures/slice_review_rates.png) | ![Slice error rates](reports/figures/slice_error_rates.png) |
+| **Analysis:** Review-rate differences show whether some applicant slices are routed to human review more often than others. | **Analysis:** Error-rate differences help identify slices where the model may need closer monitoring or additional validation. |
 
-Replace “maximize accuracy” with:
+</div>
 
-* cost(false approval) >> cost(false rejection)
-* cost(review) as a workload term
+<details>
+<summary>Additional confusion matrix</summary>
 
-Then choose thresholds that minimize expected cost.
+<div align="center">
 
-### 3) Fairness-aware reporting
+![Confusion matrix](reports/figures/confusion_matrix.png)
 
-Add slice dashboards:
+The confusion matrix gives a compact view of correct and incorrect predictions at the default decision rule.
 
-* ECE by gender
-* error rate by age band
-* approval rate by employment status
-* coverage by subgroup
+</div>
 
-### 4) Monitoring playbook
-
-Track weekly:
-
-* score distribution drift
-* coverage drift
-* approval-rate drift
-* calibration drift (ECE moving)
+</details>
 
 ---
 
-## Troubleshooting
+## Testing and CI
 
-### “My Streamlit warnings mention `use_container_width`”
+Run unit tests locally:
 
-Newer Streamlit versions prefer:
+```bash
+python -m unittest discover -s tests -v
+```
 
-* `width="stretch"` instead of `use_container_width=True`
+Compile source files:
 
-If you see deprecation warnings, update your `st.plotly_chart(...)` and `st.image(...)` calls accordingly.
+```bash
+python -m compileall src app tests
+```
 
-### “Figures look too small / layout weird”
+The GitHub Actions workflow checks:
 
-Ensure:
+- dependency installation
+- source compilation
+- unit tests
+- full pipeline smoke workflow
+- metrics artifact validation
+- prediction schema validation
+- coverage curve validation
+- policy artifact validation
+- slice report validation
+- expected figure generation
 
-* `st.set_page_config(layout="wide")`
-* Use consistent containers/columns
-* Use `width="stretch"` for charts/images in Streamlit
+CI is defined in:
+
+```text
+.github/workflows/ci.yml
+```
 
 ---
 
-## Credits
+## Code Quality
 
-* Dataset: https://www.kaggle.com/datasets/amineipad/loan-approval-dataset
-* Tools: pandas, scikit-learn, Streamlit, matplotlib/plotly
+The project separates major responsibilities across modules:
+
+<div align="center">
+
+| Module | Purpose |
+|---|---|
+| `src/data.py` | Loads data, infers schema, and prepares train/test splits |
+| `src/validation.py` | Validates input schema, target, numeric columns, and plausibility checks |
+| `src/modeling.py` | Builds preprocessing and model pipeline |
+| `src/calibration.py` | Computes calibration bins and ECE |
+| `src/abstention.py` | Builds coverage curves and recommends abstention policies |
+| `src/evaluation.py` | Computes probability metrics, baselines, and policy variants |
+| `src/slices.py` | Generates slice-level safety reports |
+| `src/plots.py` | Generates diagnostic figures |
+| `src/policy.py` | Writes the decision policy card |
+| `src/quality.py` | Creates data-quality summaries |
+| `src/pipeline.py` | Orchestrates the full workflow |
+
+</div>
+
+---
+
+## Limitations
+
+This project has important limitations:
+
+- The dataset is a demo dataset, not a production underwriting dataset
+- The project is not a credit-decision engine
+- Metrics do not prove real-world lending performance
+- Slice diagnostics are not fairness certification
+- The dashboard is not a secure underwriting platform
+- No adverse-action notice workflow is included
+- No live monitoring or drift detection is included
+- No human-review audit log is included
+- No regulatory compliance layer is included
+- Policy variants are examples, not approved business rules
+
+The project is strongest as a portfolio demonstration of calibrated decision-support workflow design.
+
+---
+
+## Responsible Use
+
+This repository is intended for:
+
+- learning about calibration and abstention
+- demonstrating decision-safety workflows
+- practicing underwriting model evaluation
+- exploring coverage-quality tradeoffs
+- reviewing slice-level diagnostics
+- portfolio demonstration
+
+It should not be used as-is for:
+
+- real loan approval or rejection
+- credit underwriting decisions
+- automated high-stakes financial decisions
+- regulatory compliance decisions
+- adverse-action generation
+- customer-facing lending workflows
+
+Any real deployment would require expert review, monitoring, fairness analysis, legal review, compliance validation, security controls, and a human escalation process.
+
+---
+
+## Future Improvements
+
+Potential next improvements:
+
+- Add fairness metrics and group-specific calibration summaries
+- Add adverse-action style reason codes
+- Add stronger model card and data statement
+- Add time-based validation and monitoring examples
+- Add drift simulation
+- Add FastAPI scoring endpoint
+- Add Docker support
+- Add audit-log style review workflow
+- Add policy-threshold selector in the dashboard
+- Add configurable cost and review-capacity assumptions
+- Add confidence intervals for slice metrics
+- Add model registry-style metadata
+
+---
+
+## Tech Stack
+
+- Python
+- pandas
+- NumPy
+- scikit-learn
+- matplotlib
+- Streamlit
+- joblib
+- unittest
+- GitHub Actions
+
+---
+
+## Author
+
+**Amir Honardoust**
+
+GitHub: [@AmirhosseinHonardoust](https://github.com/AmirhosseinHonardoust)
+
+---
+
+## License
+
+This project is intended for educational, research, and portfolio purposes.
+
+If you use or modify this project, please keep the responsible-use notes and limitations clear.
