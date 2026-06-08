@@ -1,0 +1,8 @@
+{
+  "recommended_threshold": 0.8517948717948718,
+  "expected_coverage": 0.696,
+  "expected_accuracy_auto": 0.9770114942528736,
+  "expected_f1_auto": 0.9859154929577465,
+  "target_coverage": 0.7,
+  "calibration_method": "sigmoid"
+}

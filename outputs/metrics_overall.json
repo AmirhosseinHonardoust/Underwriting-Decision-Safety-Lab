@@ -1,0 +1,13 @@
+{
+  "accuracy": 0.892,
+  "f1": 0.926829268292683,
+  "brier": 0.08037277706597558,
+  "average_precision": 0.9813740447714674,
+  "roc_auc": 0.9494990303813833,
+  "ece": 0.051400079086949664,
+  "labels": [
+    "reject",
+    "approve"
+  ],
+  "calibration_method": "sigmoid"
+}

@@ -1,0 +1,37 @@
+{
+  "target_coverage": {
+    "description": "Closest policy to target auto-decision coverage 0.70.",
+    "threshold": 0.8517948717948718,
+    "coverage": 0.696,
+    "accuracy_auto": 0.9770114942528736,
+    "f1_auto": 0.9859154929577465
+  },
+  "quality_first": {
+    "description": "Prioritizes high-quality auto-decisions while keeping some useful coverage.",
+    "threshold": 0.99,
+    "coverage": 0.336,
+    "accuracy_auto": 1.0,
+    "f1_auto": 1.0
+  },
+  "high_coverage": {
+    "description": "Maximizes automation coverage, accepting lower auto-decision quality if necessary.",
+    "threshold": 0.5,
+    "coverage": 1.0,
+    "accuracy_auto": 0.892,
+    "f1_auto": 0.926829268292683
+  },
+  "balanced": {
+    "description": "Balances auto-decision accuracy and F1.",
+    "threshold": 0.9271794871794872,
+    "coverage": 0.6,
+    "accuracy_auto": 1.0,
+    "f1_auto": 1.0
+  },
+  "conservative_review": {
+    "description": "Routes more cases to review by requiring very high confidence for auto-decision.",
+    "threshold": 0.99,
+    "coverage": 0.336,
+    "accuracy_auto": 1.0,
+    "f1_auto": 1.0
+  }
+}

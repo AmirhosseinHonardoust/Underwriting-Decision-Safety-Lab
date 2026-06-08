@@ -1,0 +1,7 @@
+{
+  "n_slices": 20,
+  "max_auto_decision_rate_gap": 0.38095238095238093,
+  "max_error_rate_gap": 0.14541730670762928,
+  "max_ece_gap": 0.08740202311956122,
+  "small_slice_count": 0
+}

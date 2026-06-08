@@ -1,0 +1,35 @@
+{
+  "rows": 1000,
+  "cols": 11,
+  "target": "loan_approved",
+  "missing_rate_by_col": {
+    "applicant_id": 0.0,
+    "age": 0.0,
+    "gender": 0.0,
+    "marital_status": 0.0,
+    "annual_income": 0.0,
+    "loan_amount": 0.0,
+    "credit_score": 0.0,
+    "num_dependents": 0.0,
+    "existing_loans_count": 0.0,
+    "employment_status": 0.0,
+    "loan_approved": 0.0
+  },
+  "n_unique_by_col": {
+    "applicant_id": 1000,
+    "age": 44,
+    "gender": 2,
+    "marital_status": 3,
+    "annual_income": 996,
+    "loan_amount": 990,
+    "credit_score": 452,
+    "num_dependents": 5,
+    "existing_loans_count": 5,
+    "employment_status": 3,
+    "loan_approved": 2
+  },
+  "plausibility_hints": {
+    "age_out_of_range_count": 0,
+    "credit_score_out_of_range_count": 0
+  }
+}

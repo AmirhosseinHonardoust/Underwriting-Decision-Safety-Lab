@@ -1,0 +1,101 @@
+{
+  "model_metrics": {
+    "accuracy": 0.892,
+    "f1": 0.926829268292683,
+    "brier": 0.08037277706597558,
+    "average_precision": 0.9813740447714674,
+    "roc_auc": 0.9494990303813833,
+    "ece": 0.051400079086949664,
+    "labels": [
+      "reject",
+      "approve"
+    ],
+    "calibration_method": "sigmoid"
+  },
+  "baseline_metrics": {
+    "majority_class": {
+      "brier": 0.272,
+      "average_precision": 0.728,
+      "roc_auc": 0.5,
+      "accuracy": 0.728,
+      "f1": 0.8425925925925926,
+      "threshold": 0.5,
+      "strategy": "most_frequent"
+    },
+    "empirical_prior": {
+      "brier": 0.1980177777777778,
+      "average_precision": 0.728,
+      "roc_auc": 0.5,
+      "accuracy": 0.728,
+      "f1": 0.8425925925925926,
+      "threshold": 0.5,
+      "strategy": "prior"
+    },
+    "stratified_random": {
+      "brier": 0.432,
+      "average_precision": 0.7089242713807931,
+      "roc_auc": 0.4499838396897221,
+      "accuracy": 0.568,
+      "f1": 0.7049180327868853,
+      "threshold": 0.5,
+      "strategy": "stratified"
+    }
+  },
+  "recommended_policy": {
+    "recommended_threshold": 0.8517948717948718,
+    "expected_coverage": 0.696,
+    "expected_accuracy_auto": 0.9770114942528736,
+    "expected_f1_auto": 0.9859154929577465,
+    "target_coverage": 0.7,
+    "calibration_method": "sigmoid"
+  },
+  "policy_variants": {
+    "target_coverage": {
+      "description": "Closest policy to target auto-decision coverage 0.70.",
+      "threshold": 0.8517948717948718,
+      "coverage": 0.696,
+      "accuracy_auto": 0.9770114942528736,
+      "f1_auto": 0.9859154929577465
+    },
+    "quality_first": {
+      "description": "Prioritizes high-quality auto-decisions while keeping some useful coverage.",
+      "threshold": 0.99,
+      "coverage": 0.336,
+      "accuracy_auto": 1.0,
+      "f1_auto": 1.0
+    },
+    "high_coverage": {
+      "description": "Maximizes automation coverage, accepting lower auto-decision quality if necessary.",
+      "threshold": 0.5,
+      "coverage": 1.0,
+      "accuracy_auto": 0.892,
+      "f1_auto": 0.926829268292683
+    },
+    "balanced": {
+      "description": "Balances auto-decision accuracy and F1.",
+      "threshold": 0.9271794871794872,
+      "coverage": 0.6,
+      "accuracy_auto": 1.0,
+      "f1_auto": 1.0
+    },
+    "conservative_review": {
+      "description": "Routes more cases to review by requiring very high confidence for auto-decision.",
+      "threshold": 0.99,
+      "coverage": 0.336,
+      "accuracy_auto": 1.0,
+      "f1_auto": 1.0
+    }
+  },
+  "slice_summary": {
+    "n_slices": 20,
+    "max_auto_decision_rate_gap": 0.38095238095238093,
+    "max_error_rate_gap": 0.14541730670762928,
+    "max_ece_gap": 0.08740202311956122,
+    "small_slice_count": 0
+  },
+  "slice_artifacts": {
+    "csv": "outputs\\slice_report.csv",
+    "json": "outputs\\slice_report.json",
+    "summary": "outputs\\slice_summary.json"
+  }
+}
