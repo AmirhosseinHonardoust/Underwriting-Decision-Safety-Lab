@@ -16,6 +16,10 @@ based on [Keep a Changelog](https://keepachangelog.com/).
 - The lint/format/type quality job now runs across Python 3.10, 3.11, and 3.12.
 
 ### Added
+- Synthetic data generator (`underwriting.synthetic`, `underwriting-generate-data`)
+  so the full pipeline runs end-to-end with no external data.
+- Run provenance: every pipeline run writes `run_manifest.json` (input SHA-256,
+  row count, config, and Python/library versions).
 - `CONTRIBUTING.md` with development setup and the quality-gate commands.
 - This changelog.
 

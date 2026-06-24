@@ -13,6 +13,7 @@ dynamic = ["dependencies"]
 
 [project.scripts]
 underwriting-pipeline = "underwriting.pipeline:main"
+underwriting-generate-data = "underwriting.synthetic:main"
 
 [tool.setuptools]
 packages = ["underwriting"]

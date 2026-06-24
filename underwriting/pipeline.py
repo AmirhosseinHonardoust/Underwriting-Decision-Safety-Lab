@@ -1,12 +1,17 @@
 from __future__ import annotations
 
 import argparse
+import hashlib
 import json
+import platform
+from datetime import datetime, timezone
+from importlib import metadata as importlib_metadata
 from pathlib import Path
 from typing import Any
 
 import joblib
 import numpy as np
+import pandas as pd
 from sklearn.pipeline import Pipeline
 
 from .abstention import coverage_curve, recommend_threshold
@@ -30,6 +35,56 @@ from .plots import (
 )
 from .slices import build_slice_report, save_slice_artifacts, summarize_slice_report
 from .validation import validate_underwriting_dataframe
+
+
+def _package_version() -> str:
+    try:
+        return importlib_metadata.version("underwriting-decision-safety-lab")
+    except importlib_metadata.PackageNotFoundError:
+        return "unknown"
+
+
+def _dependency_versions() -> dict[str, str]:
+    versions: dict[str, str] = {}
+    for dist in ("numpy", "pandas", "scikit-learn", "joblib"):
+        try:
+            versions[dist] = importlib_metadata.version(dist)
+        except importlib_metadata.PackageNotFoundError:
+            versions[dist] = "unknown"
+    return versions
+
+
+def _file_sha256(path: str) -> str:
+    digest = hashlib.sha256()
+    with open(path, "rb") as fh:
+        for chunk in iter(lambda: fh.read(65536), b""):
+            digest.update(chunk)
+    return digest.hexdigest()
+
+
+def build_run_manifest(
+    df: pd.DataFrame,
+    *,
+    input_path: str,
+    random_state: int,
+    calibration_method: str,
+    target_coverage: float,
+) -> dict[str, Any]:
+    """Capture run provenance: input fingerprint, config, and environment."""
+    return {
+        "generated_at": datetime.now(timezone.utc).isoformat(timespec="seconds"),
+        "package_version": _package_version(),
+        "python_version": platform.python_version(),
+        "platform": platform.platform(),
+        "input_path": str(input_path),
+        "input_sha256": _file_sha256(input_path),
+        "input_rows": int(len(df)),
+        "input_columns": list(df.columns),
+        "random_state": int(random_state),
+        "calibration_method": str(calibration_method),
+        "target_coverage": float(target_coverage),
+        "dependency_versions": _dependency_versions(),
+    }
 
 
 def run(
@@ -171,12 +226,22 @@ def run(
     dq = basic_quality_report(df, spec)
     (out_dir_p / "data_quality.json").write_text(json.dumps(dq, indent=2), encoding="utf-8")
 
+    manifest = build_run_manifest(
+        df,
+        input_path=input_path,
+        random_state=random_state,
+        calibration_method=calibration_method,
+        target_coverage=recommend_target_coverage,
+    )
+    (out_dir_p / "run_manifest.json").write_text(json.dumps(manifest, indent=2), encoding="utf-8")
+
     return {
         "metrics": metrics,
         "policy": policy,
         "baseline_metrics": baseline_metrics,
         "policy_variants": policy_variants,
         "slice_summary": slice_summary,
+        "run_manifest": manifest,
         "outputs_dir": str(out_dir_p),
         "figures_dir": str(fig_dir_p),
     }
