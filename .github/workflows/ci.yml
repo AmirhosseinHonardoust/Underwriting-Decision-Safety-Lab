@@ -76,6 +76,27 @@ jobs:
           coverage run -m unittest discover -s tests -v
           coverage report
 
+      - name: Enforce per-file coverage floor
+        run: |
+          coverage json -o coverage.json
+          python - <<'PY'
+          import json
+          import sys
+
+          FLOOR = 80.0
+          data = json.load(open("coverage.json"))
+          offenders = [
+              (path, round(info["summary"]["percent_covered"], 1))
+              for path, info in data["files"].items()
+              if info["summary"]["percent_covered"] < FLOOR
+          ]
+          if offenders:
+              for path, pct in offenders:
+                  print(f"{path}: {pct}% < {FLOOR}% floor")
+              sys.exit(1)
+          print(f"All files meet the {FLOOR:.0f}% per-file coverage floor.")
+          PY
+
       - name: Run pipeline smoke workflow
         run: |
           python -m underwriting.pipeline \
