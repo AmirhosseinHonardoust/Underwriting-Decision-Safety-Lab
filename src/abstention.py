@@ -23,7 +23,7 @@ def coverage_curve(
             f1 = float("nan")
         else:
             acc = float(accuracy_score(y_true[auto], pred[auto]))
-            f1 = float(f1_score(y_true[auto], pred[auto]))
+            f1 = float(f1_score(y_true[auto], pred[auto], zero_division=0))
         rows.append({"threshold": float(t), "coverage": cov, "accuracy": acc, "f1": f1})
 
     return pd.DataFrame(rows)

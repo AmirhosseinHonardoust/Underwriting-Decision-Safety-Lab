@@ -40,9 +40,9 @@ def infer_spec(df: pd.DataFrame) -> DataSpec:
 
 
 def load_csv(path: str) -> pd.DataFrame:
-    df = pd.read_csv(path)
-    validate_dataframe_structure(df)
-    return df
+    # Structural validation runs in infer_spec, the schema-inference entry point,
+    # so the pipeline validates exactly once per run.
+    return pd.read_csv(path)
 
 
 def basic_quality_report(df: pd.DataFrame, spec: DataSpec) -> dict:

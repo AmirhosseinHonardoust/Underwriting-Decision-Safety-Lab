@@ -71,6 +71,7 @@ def compute_binary_metrics(
     }
     try:
         out["roc_auc"] = float(roc_auc_score(y_true, proba_approve))
-    except Exception:
+    except ValueError:
+        # roc_auc is undefined when y_true contains a single class.
         out["roc_auc"] = float("nan")
     return out
