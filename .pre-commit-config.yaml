@@ -1,0 +1,19 @@
+# Pre-commit hooks mirror the CI quality job (ruff, black, mypy).
+# Install once with:  pre-commit install
+# Run on demand with: pre-commit run --all-files
+repos:
+  - repo: https://github.com/astral-sh/ruff-pre-commit
+    rev: v0.15.19
+    hooks:
+      - id: ruff
+
+  - repo: https://github.com/psf/black
+    rev: 26.5.1
+    hooks:
+      - id: black
+
+  - repo: https://github.com/pre-commit/mirrors-mypy
+    rev: v2.1.0
+    hooks:
+      - id: mypy
+        pass_filenames: false
