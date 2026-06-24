@@ -18,7 +18,7 @@ repos:
       - id: mypy
         pass_filenames: false
         additional_dependencies:
-          - pandas-stubs==3.0.3.260530
+          - pandas-stubs==2.3.3.260113
 
   - repo: https://github.com/econchick/interrogate
     rev: 1.7.0
