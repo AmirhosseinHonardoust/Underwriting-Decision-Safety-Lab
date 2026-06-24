@@ -5,7 +5,6 @@ import tempfile
 import unittest
 from pathlib import Path
 
-import numpy as np
 import pandas as pd
 
 from src.slices import (
@@ -23,7 +22,14 @@ class SliceReportingTests(unittest.TestCase):
             {
                 "gender": ["Female", "Male", "Female", "Male", "Female", "Male"],
                 "marital_status": ["Single", "Married", "Single", "Married", "Divorced", "Single"],
-                "employment_status": ["Employed", "Employed", "Unemployed", "Self-employed", "Employed", "Unemployed"],
+                "employment_status": [
+                    "Employed",
+                    "Employed",
+                    "Unemployed",
+                    "Self-employed",
+                    "Employed",
+                    "Unemployed",
+                ],
                 "age": [22, 45, 35, 60, 29, 52],
                 "credit_score": [620, 740, 680, 810, 590, 710],
                 "annual_income": [45000, 90000, 62000, 120000, 38000, 76000],

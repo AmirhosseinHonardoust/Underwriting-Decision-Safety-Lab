@@ -1,13 +1,13 @@
 from __future__ import annotations
 
-from typing import Dict
-    
 import numpy as np
 import pandas as pd
 from sklearn.metrics import accuracy_score, f1_score
-  
-     
-def coverage_curve(y_true: np.ndarray, p_approve: np.ndarray, thresholds: np.ndarray) -> pd.DataFrame:
+
+
+def coverage_curve(
+    y_true: np.ndarray, p_approve: np.ndarray, thresholds: np.ndarray
+) -> pd.DataFrame:
     y_true = np.asarray(y_true)
     p = np.asarray(p_approve)
 
@@ -29,13 +29,15 @@ def coverage_curve(y_true: np.ndarray, p_approve: np.ndarray, thresholds: np.nda
     return pd.DataFrame(rows)
 
 
-def recommend_threshold(curve: pd.DataFrame, target_coverage: float) -> Dict[str, float]:
+def recommend_threshold(curve: pd.DataFrame, target_coverage: float) -> dict[str, float]:
     c = curve.copy()
     c["dist"] = (c["coverage"] - float(target_coverage)).abs()
     best = c.sort_values(["dist", "threshold"], ascending=[True, False]).iloc[0]
     return {
         "recommended_threshold": float(best["threshold"]),
         "expected_coverage": float(best["coverage"]),
-        "expected_accuracy_auto": float(best["accuracy"]) if pd.notna(best["accuracy"]) else float("nan"),
+        "expected_accuracy_auto": (
+            float(best["accuracy"]) if pd.notna(best["accuracy"]) else float("nan")
+        ),
         "expected_f1_auto": float(best["f1"]) if pd.notna(best["f1"]) else float("nan"),
     }

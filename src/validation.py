@@ -1,7 +1,7 @@
 from __future__ import annotations
 
+from collections.abc import Iterable, Sequence
 from dataclasses import dataclass
-from typing import Iterable, Sequence
 
 import pandas as pd
 
@@ -87,7 +87,7 @@ def validate_target_column(df: pd.DataFrame, target: str) -> None:
         raise DataValidationError(f"target column {target!r} contains missing values")
 
     values = set(y.dropna().unique().tolist())
-    allowed = {0, 1, 0.0, 1.0, False, True}
+    allowed = {0, 1}
     if not values.issubset(allowed):
         raise DataValidationError(
             f"target column {target!r} must be binary 0/1; found values: {sorted(map(str, values))}"
@@ -112,17 +112,23 @@ def validate_numeric_features(df: pd.DataFrame, numeric_cols: Iterable[str]) -> 
             missing.append(str(col))
 
     if bad_type:
-        raise DataValidationError(f"numeric columns must contain numeric values: {_format_columns(bad_type)}")
+        raise DataValidationError(
+            f"numeric columns must contain numeric values: {_format_columns(bad_type)}"
+        )
 
     if missing:
-        raise DataValidationError(f"numeric columns contain missing values: {_format_columns(missing)}")
+        raise DataValidationError(
+            f"numeric columns contain missing values: {_format_columns(missing)}"
+        )
 
 
 def validate_categorical_features(df: pd.DataFrame, categorical_cols: Iterable[str]) -> None:
     """Validate categorical columns for missing values."""
     missing = [str(col) for col in categorical_cols if col in df.columns and df[col].isna().any()]
     if missing:
-        raise DataValidationError(f"categorical columns contain missing values: {_format_columns(missing)}")
+        raise DataValidationError(
+            f"categorical columns contain missing values: {_format_columns(missing)}"
+        )
 
 
 def validate_plausible_ranges(

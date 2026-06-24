@@ -1,13 +1,13 @@
-import sys
-import json
 import base64
+import json
+import sys
 from pathlib import Path
-                             
-import pandas as pd
-import streamlit as st
-import plotly.express as px
+
 import joblib
-   
+import pandas as pd
+import plotly.express as px
+import streamlit as st
+
 PROJECT_ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(PROJECT_ROOT))
 
@@ -23,8 +23,10 @@ def _img_tile(path: Path, caption: str, height_px: int = 340) -> None:
     b64 = base64.b64encode(path.read_bytes()).decode("utf-8")
     st.markdown(
         f"""
-        <div style="border:1px solid rgba(49,51,63,0.15); border-radius:14px; padding:10px; background:white;">
-          <img src="data:image/png;base64,{b64}" style="width:100%; height:{height_px}px; object-fit:contain; display:block;" />
+        <div style="border:1px solid rgba(49,51,63,0.15); border-radius:14px;
+                    padding:10px; background:white;">
+          <img src="data:image/png;base64,{b64}"
+               style="width:100%; height:{height_px}px; object-fit:contain; display:block;" />
         </div>
         """,
         unsafe_allow_html=True,
@@ -112,15 +114,31 @@ with tab_report:
     st.subheader("Figures")
     r1 = st.columns(2, gap="large")
     with r1[0]:
-        _img_tile(FIG_DIR / "confusion_matrix.png", "Confusion matrix (baseline threshold=0.5)", height_px=fig_height)
+        _img_tile(
+            FIG_DIR / "confusion_matrix.png",
+            "Confusion matrix (baseline threshold=0.5)",
+            height_px=fig_height,
+        )
     with r1[1]:
-        _img_tile(FIG_DIR / "reliability_diagram.png", "Reliability diagram (calibration)", height_px=fig_height)
+        _img_tile(
+            FIG_DIR / "reliability_diagram.png",
+            "Reliability diagram (calibration)",
+            height_px=fig_height,
+        )
 
     r2 = st.columns(2, gap="large")
     with r2[0]:
-        _img_tile(FIG_DIR / "coverage_vs_performance.png", "Coverage vs performance (abstention tradeoff)", height_px=fig_height)
+        _img_tile(
+            FIG_DIR / "coverage_vs_performance.png",
+            "Coverage vs performance (abstention tradeoff)",
+            height_px=fig_height,
+        )
     with r2[1]:
-        _img_tile(FIG_DIR / "probability_histograms.png", "Probability histograms (confidence separation)", height_px=fig_height)
+        _img_tile(
+            FIG_DIR / "probability_histograms.png",
+            "Probability histograms (confidence separation)",
+            height_px=fig_height,
+        )
 
     if policy:
         with st.expander("Policy JSON"):
@@ -128,7 +146,9 @@ with tab_report:
 
 with tab_curve:
     st.subheader("Coverage frontier")
-    st.caption("As threshold increases, coverage drops but auto-decision quality typically improves.")
+    st.caption(
+        "As threshold increases, coverage drops but auto-decision quality typically improves."
+    )
     if not curve.empty:
         fig = px.line(curve, x="coverage", y=["accuracy", "f1"], markers=True)
         st.plotly_chart(fig, width="stretch")
@@ -140,7 +160,9 @@ with tab_curve:
 
 with tab_triage:
     st.subheader("Interactive decision-safe triage")
-    st.caption("Enter an applicant profile -> see probability, confidence, and whether the system should auto-decide or review.")
+    st.caption(
+        "Enter an applicant profile -> see probability, confidence, and whether the system should auto-decide or review."  # noqa: E501
+    )
 
     if not model_path.exists():
         st.info("Model not found. Run pipeline to create outputs/model.joblib.")
@@ -158,7 +180,9 @@ with tab_triage:
         c4, c5, c6 = st.columns(3)
         income = c4.number_input("Annual income", min_value=0, value=80000, step=1000)
         loan_amount = c5.number_input("Loan amount", min_value=0, value=25000, step=500)
-        credit_score = c6.number_input("Credit score", min_value=300, max_value=850, value=700, step=1)
+        credit_score = c6.number_input(
+            "Credit score", min_value=300, max_value=850, value=700, step=1
+        )
 
         c7, c8, c9 = st.columns(3)
         dependents = c7.number_input("Num dependents", min_value=0, value=1, step=1)
@@ -178,17 +202,19 @@ with tab_triage:
 
     if submitted:
         row = pd.DataFrame(
-            [{
-                "age": age,
-                "gender": gender,
-                "marital_status": marital,
-                "annual_income": income,
-                "loan_amount": loan_amount,
-                "credit_score": credit_score,
-                "num_dependents": dependents,
-                "existing_loans_count": existing_loans,
-                "employment_status": employment,
-            }]
+            [
+                {
+                    "age": age,
+                    "gender": gender,
+                    "marital_status": marital,
+                    "annual_income": income,
+                    "loan_amount": loan_amount,
+                    "credit_score": credit_score,
+                    "num_dependents": dependents,
+                    "existing_loans_count": existing_loans,
+                    "employment_status": employment,
+                }
+            ]
         )
         p = float(model.predict_proba(row)[:, 1][0])
         conf = max(p, 1.0 - p)
@@ -214,7 +240,9 @@ with tab_triage:
 
 with tab_slices:
     st.subheader("Slice safety report")
-    st.caption("Review rate, error rate, and calibration diagnostics by applicant slices. These are monitoring diagnostics, not fairness certification.")
+    st.caption(
+        "Review rate, error rate, and calibration diagnostics by applicant slices. These are monitoring diagnostics, not fairness certification."  # noqa: E501
+    )
 
     slice_report_path = OUT_DIR / "slice_report.csv"
     slice_summary_path = OUT_DIR / "slice_summary.json"
@@ -223,7 +251,9 @@ with tab_slices:
         slice_summary = json.loads(slice_summary_path.read_text(encoding="utf-8"))
         s1, s2, s3, s4 = st.columns(4)
         s1.metric("Slices", int(slice_summary.get("n_slices", 0)))
-        s2.metric("Auto-rate gap", f'{slice_summary.get("max_auto_decision_rate_gap", float("nan")):.3f}')
+        s2.metric(
+            "Auto-rate gap", f'{slice_summary.get("max_auto_decision_rate_gap", float("nan")):.3f}'
+        )
         s3.metric("Error-rate gap", f'{slice_summary.get("max_error_rate_gap", float("nan")):.3f}')
         s4.metric("Small slices", int(slice_summary.get("small_slice_count", 0)))
 
@@ -234,9 +264,13 @@ with tab_slices:
         st.subheader("Slice figures")
         sfig1, sfig2 = st.columns(2, gap="large")
         with sfig1:
-            _img_tile(FIG_DIR / "slice_review_rates.png", "Review rate by slice", height_px=fig_height)
+            _img_tile(
+                FIG_DIR / "slice_review_rates.png", "Review rate by slice", height_px=fig_height
+            )
         with sfig2:
-            _img_tile(FIG_DIR / "slice_error_rates.png", "Error rate by slice", height_px=fig_height)
+            _img_tile(
+                FIG_DIR / "slice_error_rates.png", "Error rate by slice", height_px=fig_height
+            )
     else:
         st.info("Slice report not found. Run the pipeline to generate slice safety artifacts.")
 
@@ -244,8 +278,7 @@ with tab_quality:
     st.subheader("Data quality (quick checks)")
     if dq:
         st.json(dq)
-        st.markdown(
-            """
+        st.markdown("""
 ### Why this matters
 Loan models are sensitive to:
 - missingness patterns (non-random missingness is a signal)
@@ -253,23 +286,21 @@ Loan models are sensitive to:
 - category drift (new employment types)
 
 Use these checks as a lightweight "quality gate" before trusting results.
-            """.strip()
-        )
+            """.strip())
     else:
         st.info("No data quality report found (outputs/data_quality.json).")
 
 with tab_notes:
-    st.markdown(
-        """
+    st.markdown("""
 ## Decision safety notes
 - **Accuracy != trust.** A model can be accurate but overconfident.
 - **ECE** is calibration error (lower is better).
-- **Coverage** is a product metric: abstain too much and you lose usability; abstain too little and you increase risk.
+- **Coverage** is a product metric: abstain too much and you lose usability;
+  abstain too little and you increase risk.
 
 ## How to make it production-grade
 - Add fairness slice audits: calibration and error rates by gender/age/employment.
 - Add monitoring: score distribution drift, approval rate drift, coverage drift.
 - Add a cost model: false-approvals vs false-rejections vs review cost.
 - Retraining policy: trigger when calibration or coverage shifts materially.
-        """.strip()
-    )
+        """.strip())

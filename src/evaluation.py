@@ -125,19 +125,25 @@ def select_policy_variants(
             "f1_auto": _safe_float(row["f1"]),
         }
 
-    target = valid.assign(distance=(valid["coverage"] - float(target_coverage)).abs()).sort_values(
-        ["distance", "threshold"], ascending=[True, False]
-    ).iloc[0]
+    target = (
+        valid.assign(distance=(valid["coverage"] - float(target_coverage)).abs())
+        .sort_values(["distance", "threshold"], ascending=[True, False])
+        .iloc[0]
+    )
 
     eligible_quality = valid[valid["coverage"] >= float(min_quality_coverage)]
     if eligible_quality.empty:
         eligible_quality = valid
-    quality_first = eligible_quality.sort_values(["accuracy", "f1", "threshold"], ascending=[False, False, False]).iloc[0]
+    quality_first = eligible_quality.sort_values(
+        ["accuracy", "f1", "threshold"], ascending=[False, False, False]
+    ).iloc[0]
 
     high_coverage = valid.sort_values(["coverage", "accuracy"], ascending=[False, False]).iloc[0]
-    balanced = valid.assign(balance_score=0.5 * valid["accuracy"] + 0.5 * valid["f1"]).sort_values(
-        ["balance_score", "coverage"], ascending=[False, False]
-    ).iloc[0]
+    balanced = (
+        valid.assign(balance_score=0.5 * valid["accuracy"] + 0.5 * valid["f1"])
+        .sort_values(["balance_score", "coverage"], ascending=[False, False])
+        .iloc[0]
+    )
 
     conservative_review = valid.sort_values(["threshold"], ascending=[False]).iloc[0]
 
