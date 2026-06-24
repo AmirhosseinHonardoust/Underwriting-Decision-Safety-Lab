@@ -1,14 +1,13 @@
 from __future__ import annotations
 
 import json
+from collections.abc import Iterable
 from pathlib import Path
-from typing import Iterable
 
 import numpy as np
 import pandas as pd
 
 from .calibration import expected_calibration_error
-
 
 DEFAULT_CATEGORICAL_SLICE_COLUMNS = [
     "gender",
@@ -107,10 +106,7 @@ def slice_metrics_for_group(
     false_approval = (pred == 1) & (y == 0)
     false_rejection = (pred == 0) & (y == 1)
 
-    if auto.any():
-        auto_accuracy = _safe_rate(pred[auto].to_numpy() == y[auto].to_numpy())
-    else:
-        auto_accuracy = None
+    auto_accuracy = _safe_rate(pred[auto].to_numpy() == y[auto].to_numpy()) if auto.any() else None
 
     return {
         "n": n,
@@ -152,7 +148,9 @@ def build_slice_report(
         slice_columns = [
             col for col in DEFAULT_CATEGORICAL_SLICE_COLUMNS if col in enriched.columns
         ] + [
-            f"{col}_band" for col in DEFAULT_NUMERIC_SLICE_COLUMNS if f"{col}_band" in enriched.columns
+            f"{col}_band"
+            for col in DEFAULT_NUMERIC_SLICE_COLUMNS
+            if f"{col}_band" in enriched.columns
         ]
 
     rows: list[dict] = []
@@ -216,7 +214,9 @@ def summarize_slice_report(report: pd.DataFrame) -> dict[str, float | int | None
         "max_auto_decision_rate_gap": gap_for("auto_decision_rate"),
         "max_error_rate_gap": gap_for("error_rate"),
         "max_ece_gap": gap_for("ece"),
-        "small_slice_count": int(report["is_small_slice"].sum()) if "is_small_slice" in report.columns else 0,
+        "small_slice_count": (
+            int(report["is_small_slice"].sum()) if "is_small_slice" in report.columns else 0
+        ),
     }
 
 

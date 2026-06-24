@@ -1,12 +1,10 @@
 from __future__ import annotations
 
 from dataclasses import dataclass
-from typing import List
 
 import pandas as pd
 
 from .validation import validate_dataframe_structure
-
 
 TARGET_CANDIDATES = ["loan_approved", "approved", "LoanApproved", "target", "label"]
 
@@ -14,9 +12,9 @@ TARGET_CANDIDATES = ["loan_approved", "approved", "LoanApproved", "target", "lab
 @dataclass
 class DataSpec:
     target: str
-    id_cols: List[str]
-    numeric_cols: List[str]
-    categorical_cols: List[str]
+    id_cols: list[str]
+    numeric_cols: list[str]
+    categorical_cols: list[str]
 
 
 def infer_spec(df: pd.DataFrame) -> DataSpec:
@@ -36,7 +34,9 @@ def infer_spec(df: pd.DataFrame) -> DataSpec:
     numeric_cols = [c for c in feature_cols if pd.api.types.is_numeric_dtype(df[c])]
     categorical_cols = [c for c in feature_cols if c not in numeric_cols]
 
-    return DataSpec(target=target, id_cols=id_cols, numeric_cols=numeric_cols, categorical_cols=categorical_cols)
+    return DataSpec(
+        target=target, id_cols=id_cols, numeric_cols=numeric_cols, categorical_cols=categorical_cols
+    )
 
 
 def load_csv(path: str) -> pd.DataFrame:

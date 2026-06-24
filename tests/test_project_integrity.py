@@ -5,7 +5,6 @@ import py_compile
 import unittest
 from pathlib import Path
 
-
 ROOT = Path(__file__).resolve().parents[1]
 
 
@@ -38,7 +37,9 @@ class ProjectIntegrityTests(unittest.TestCase):
 
     def test_requirements_are_line_separated(self) -> None:
         requirements = (ROOT / "requirements.txt").read_text(encoding="utf-8").splitlines()
-        dependencies = [line.strip() for line in requirements if line.strip() and not line.startswith("#")]
+        dependencies = [
+            line.strip() for line in requirements if line.strip() and not line.startswith("#")
+        ]
 
         self.assertGreaterEqual(len(dependencies), 5)
         for dependency in dependencies:

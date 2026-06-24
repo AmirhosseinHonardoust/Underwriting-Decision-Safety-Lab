@@ -5,7 +5,13 @@ from pathlib import Path
 import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
-from sklearn.metrics import ConfusionMatrixDisplay, PrecisionRecallDisplay, average_precision_score, confusion_matrix, precision_recall_curve
+from sklearn.metrics import (
+    ConfusionMatrixDisplay,
+    PrecisionRecallDisplay,
+    average_precision_score,
+    confusion_matrix,
+    precision_recall_curve,
+)
 
 try:  # package import
     from .calibration import calibration_bins
@@ -29,7 +35,9 @@ def plot_confusion_matrix(y_true: np.ndarray, y_pred: np.ndarray, outpath: Path)
     plt.close(fig)
 
 
-def plot_reliability_diagram(y_true: np.ndarray, p: np.ndarray, outpath: Path, n_bins: int = 10) -> None:
+def plot_reliability_diagram(
+    y_true: np.ndarray, p: np.ndarray, outpath: Path, n_bins: int = 10
+) -> None:
     """Plot predicted approval probability vs observed approval rate."""
     _ensure_dir(outpath.parent)
 
@@ -76,7 +84,9 @@ def plot_precision_recall_curve(y_true: np.ndarray, p: np.ndarray, outpath: Path
     average_precision = average_precision_score(y_true, p)
 
     fig, ax = plt.subplots(figsize=(7.4, 5.6))
-    display = PrecisionRecallDisplay(precision=precision, recall=recall, average_precision=average_precision)
+    display = PrecisionRecallDisplay(
+        precision=precision, recall=recall, average_precision=average_precision
+    )
     display.plot(ax=ax)
     ax.set_title("Precision-Recall Curve (Approval Class)")
     plt.tight_layout()

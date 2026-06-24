@@ -16,7 +16,6 @@ from src.evaluation import (
 )
 from src.pipeline import run
 
-
 ROOT = Path(__file__).resolve().parents[1]
 DATA_PATH = ROOT / "data" / "raw" / "loanapproval.csv"
 
@@ -73,7 +72,13 @@ class EvaluationImprovementTests(unittest.TestCase):
 
         variants = select_policy_variants(curve, target_coverage=0.70)
 
-        expected = {"target_coverage", "quality_first", "high_coverage", "balanced", "conservative_review"}
+        expected = {
+            "target_coverage",
+            "quality_first",
+            "high_coverage",
+            "balanced",
+            "conservative_review",
+        }
         self.assertEqual(set(variants), expected)
         self.assertAlmostEqual(variants["target_coverage"]["coverage"], 0.70)
         for policy in variants.values():

@@ -1,13 +1,18 @@
 from __future__ import annotations
 
 from dataclasses import dataclass
-from typing import Dict
-          
+
 import numpy as np
 import pandas as pd
 from sklearn.compose import ColumnTransformer
 from sklearn.linear_model import LogisticRegression
-from sklearn.metrics import accuracy_score, average_precision_score, brier_score_loss, f1_score, roc_auc_score
+from sklearn.metrics import (
+    accuracy_score,
+    average_precision_score,
+    brier_score_loss,
+    f1_score,
+    roc_auc_score,
+)
 from sklearn.model_selection import train_test_split
 from sklearn.pipeline import Pipeline
 from sklearn.preprocessing import OneHotEncoder, StandardScaler
@@ -43,7 +48,9 @@ def make_base_model(random_state: int = 42) -> LogisticRegression:
     )
 
 
-def train_test_split_data(df: pd.DataFrame, target: str, *, test_size=0.25, random_state=42) -> SplitData:
+def train_test_split_data(
+    df: pd.DataFrame, target: str, *, test_size=0.25, random_state=42
+) -> SplitData:
     X = df.drop(columns=[target])
     y = df[target].astype(int).to_numpy()
 
@@ -53,7 +60,9 @@ def train_test_split_data(df: pd.DataFrame, target: str, *, test_size=0.25, rand
     return SplitData(X_train=X_train, X_test=X_test, y_train=y_train, y_test=y_test)
 
 
-def compute_binary_metrics(y_true: np.ndarray, proba_approve: np.ndarray, y_pred: np.ndarray) -> Dict[str, float]:
+def compute_binary_metrics(
+    y_true: np.ndarray, proba_approve: np.ndarray, y_pred: np.ndarray
+) -> dict[str, float]:
     out = {
         "accuracy": float(accuracy_score(y_true, y_pred)),
         "f1": float(f1_score(y_true, y_pred)),
