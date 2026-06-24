@@ -12,6 +12,7 @@ PROJECT_ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(PROJECT_ROOT))
 
 from underwriting.pipeline import run as run_pipeline  # noqa: E402
+from underwriting.triage import applicant_to_frame, triage_decision  # noqa: E402
 from underwriting.validation import DataValidationError  # noqa: E402
 
 
@@ -201,29 +202,24 @@ with tab_triage:
         submitted = st.form_submit_button("Evaluate", type="primary")
 
     if submitted:
-        row = pd.DataFrame(
-            [
-                {
-                    "age": age,
-                    "gender": gender,
-                    "marital_status": marital,
-                    "annual_income": income,
-                    "loan_amount": loan_amount,
-                    "credit_score": credit_score,
-                    "num_dependents": dependents,
-                    "existing_loans_count": existing_loans,
-                    "employment_status": employment,
-                }
-            ]
+        row = applicant_to_frame(
+            age=age,
+            gender=gender,
+            marital_status=marital,
+            annual_income=income,
+            loan_amount=loan_amount,
+            credit_score=credit_score,
+            num_dependents=dependents,
+            existing_loans_count=existing_loans,
+            employment_status=employment,
         )
         p = float(model.predict_proba(row)[:, 1][0])
-        conf = max(p, 1.0 - p)
-        auto = conf >= float(thr)
+        result = triage_decision(p, float(thr))
 
         d1, d2, d3 = st.columns(3)
-        d1.metric("p(approve)", f"{p:.3f}")
-        d2.metric("confidence", f"{conf:.3f}")
-        d3.metric("Decision", "AUTO-DECIDE" if auto else "REVIEW")
+        d1.metric("p(approve)", f"{result.p_approve:.3f}")
+        d2.metric("confidence", f"{result.confidence:.3f}")
+        d3.metric("Decision", result.decision)
 
         st.plotly_chart(
             px.bar(

@@ -16,6 +16,9 @@ based on [Keep a Changelog](https://keepachangelog.com/).
 - The lint/format/type quality job now runs across Python 3.10, 3.11, and 3.12.
 
 ### Added
+- Extracted the decision-safe triage logic from the Streamlit app into a tested
+  `underwriting.triage` module; raised coverage to 90% overall with an 80%
+  per-file floor enforced in CI, plus edge/property tests for triage and validation.
 - `pandas-stubs` so mypy type-checks the pandas boundary; docstrings on the full
   public API with an `interrogate` 100% docstring-coverage gate in CI and pre-commit.
 - Consolidated, self-contained `model_card.html` generated each run (metrics,

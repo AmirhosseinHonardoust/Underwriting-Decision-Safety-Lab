@@ -15,6 +15,7 @@ venv/
 # Coverage
 .coverage
 .coverage.*
+coverage.json
 htmlcov/
 
 # CI scratch output dirs (the committed outputs/ and reports/figures/ are intentional)

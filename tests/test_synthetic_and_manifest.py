@@ -1,11 +1,14 @@
 from __future__ import annotations
 
+import sys
 import tempfile
 import unittest
 from pathlib import Path
+from unittest import mock
 
 from underwriting.pipeline import build_run_manifest, run
 from underwriting.synthetic import generate_synthetic
+from underwriting.synthetic import main as synthetic_main
 from underwriting.validation import validate_underwriting_dataframe
 
 
@@ -30,6 +33,19 @@ class SyntheticDataTests(unittest.TestCase):
         self.assertEqual(list(a.columns), self.EXPECTED_COLUMNS)
         self.assertEqual(len(a), 300)
         self.assertTrue(a.equals(b))  # same seed -> identical frame
+
+    def test_invalid_row_count_raises(self) -> None:
+        with self.assertRaises(ValueError):
+            generate_synthetic(n_rows=0)
+
+    def test_cli_main_writes_csv(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            out = Path(tmp) / "nested" / "synth.csv"
+            argv = ["underwriting-generate-data", "--out", str(out), "--rows", "40", "--seed", "1"]
+            with mock.patch.object(sys, "argv", argv):
+                synthetic_main()
+            self.assertTrue(out.exists())
+            self.assertEqual(len(out.read_text().strip().splitlines()), 41)  # header + 40 rows
 
     def test_passes_validation_and_has_both_classes(self) -> None:
         df = generate_synthetic(n_rows=400, random_state=1)

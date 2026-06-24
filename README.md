@@ -198,6 +198,7 @@ Underwriting-Decision-Safety-Lab/
 │   ├── plots.py
 │   ├── slices.py
 │   ├── synthetic.py
+│   ├── triage.py
 │   └── validation.py
 │
 ├── tests/
@@ -587,7 +588,7 @@ The GitHub Actions workflow checks:
 - public-API docstring coverage (interrogate, 100%)
 - dependency installation
 - source compilation
-- unit tests with coverage (minimum 80%)
+- unit tests with coverage (90% overall, 80% per-file)
 - full pipeline smoke workflow
 - metrics artifact validation
 - prediction schema validation

@@ -48,7 +48,7 @@ strict_equality = true
 source = ["underwriting"]
 
 [tool.coverage.report]
-fail_under = 85
+fail_under = 90
 show_missing = true
 
 [tool.interrogate]
