@@ -8,13 +8,13 @@ from pathlib import Path
 import numpy as np
 import pandas as pd
 
-from src.evaluation import (
+from underwriting.evaluation import (
     classification_metrics_at_threshold,
     compute_baseline_metrics,
     probability_metrics,
     select_policy_variants,
 )
-from src.pipeline import run
+from underwriting.pipeline import run
 
 ROOT = Path(__file__).resolve().parents[1]
 DATA_PATH = ROOT / "data" / "raw" / "loanapproval.csv"

@@ -14,12 +14,12 @@ class ProjectIntegrityTests(unittest.TestCase):
             "README.md",
             "requirements.txt",
             "data/raw/loanapproval.csv",
-            "src/data.py",
-            "src/modeling.py",
-            "src/calibration.py",
-            "src/abstention.py",
-            "src/plots.py",
-            "src/pipeline.py",
+            "underwriting/data.py",
+            "underwriting/modeling.py",
+            "underwriting/calibration.py",
+            "underwriting/abstention.py",
+            "underwriting/plots.py",
+            "underwriting/pipeline.py",
             "app/app.py",
         ]
 
@@ -28,7 +28,7 @@ class ProjectIntegrityTests(unittest.TestCase):
                 self.assertTrue((ROOT / relative_path).exists(), f"Missing {relative_path}")
 
     def test_python_source_files_compile(self) -> None:
-        source_files = list((ROOT / "src").glob("*.py")) + [ROOT / "app" / "app.py"]
+        source_files = list((ROOT / "underwriting").glob("*.py")) + [ROOT / "app" / "app.py"]
         self.assertTrue(source_files, "No Python source files found")
 
         for path in source_files:

@@ -11,8 +11,8 @@ import streamlit as st
 PROJECT_ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(PROJECT_ROOT))
 
-from src.pipeline import run as run_pipeline  # noqa: E402
-from src.validation import DataValidationError  # noqa: E402
+from underwriting.pipeline import run as run_pipeline  # noqa: E402
+from underwriting.validation import DataValidationError  # noqa: E402
 
 
 def _img_tile(path: Path, caption: str, height_px: int = 340) -> None:

@@ -183,8 +183,9 @@ Underwriting-Decision-Safety-Lab/
 │       ├── slice_error_rates.png
 │       └── slice_review_rates.png
 │
-├── src/
+├── underwriting/
 │   ├── __init__.py
+│   ├── _typing.py
 │   ├── abstention.py
 │   ├── calibration.py
 │   ├── data.py
@@ -206,6 +207,8 @@ Underwriting-Decision-Safety-Lab/
 │
 ├── .gitignore
 ├── .pre-commit-config.yaml
+├── CHANGELOG.md
+├── CONTRIBUTING.md
 ├── README.md
 ├── pyproject.toml
 ├── requirements.txt
@@ -260,7 +263,7 @@ pip install -e .
 Run the full local workflow:
 
 ```bash
-python -m src.pipeline --input data/raw/loanapproval.csv --target-coverage 0.70
+python -m underwriting.pipeline --input data/raw/loanapproval.csv --target-coverage 0.70
 ```
 
 After an editable install, the same workflow is available as a command:
@@ -282,7 +285,7 @@ streamlit run app/app.py
 The main pipeline trains the underwriting model, calibrates probabilities, evaluates the model, generates coverage and policy artifacts, and writes figures.
 
 ```bash
-python -m src.pipeline \
+python -m underwriting.pipeline \
   --input data/raw/loanapproval.csv \
   --out-dir outputs \
   --figures-dir reports/figures \
@@ -534,7 +537,7 @@ python -m unittest discover -s tests -v
 Compile source files:
 
 ```bash
-python -m compileall src app tests
+python -m compileall underwriting app tests
 ```
 
 Set up the development tools (linting, formatting, type checking, coverage, hooks):
@@ -547,10 +550,10 @@ pre-commit install            # optional: run the gate on every commit
 Run the quality gate locally (matches CI):
 
 ```bash
-ruff check src app tests
-black --check src app tests
+ruff check underwriting app tests
+black --check underwriting app tests
 mypy
-coverage run --source=src -m unittest discover -s tests && coverage report -m
+coverage run --source=underwriting -m unittest discover -s tests && coverage report -m
 ```
 
 The GitHub Actions workflow checks:
@@ -583,15 +586,15 @@ The project separates major responsibilities across modules:
 
 | Module | Purpose |
 |---|---|
-| `src/data.py` | Loads data, infers schema, and creates data-quality summaries |
-| `src/validation.py` | Validates input schema, target, numeric columns, and plausibility checks |
-| `src/modeling.py` | Builds preprocessing and model pipeline, and prepares train/test splits |
-| `src/calibration.py` | Computes calibration bins and ECE |
-| `src/abstention.py` | Builds coverage curves and recommends abstention policies |
-| `src/evaluation.py` | Computes probability metrics, baselines, and policy variants |
-| `src/slices.py` | Generates slice-level safety reports |
-| `src/plots.py` | Generates diagnostic figures |
-| `src/pipeline.py` | Orchestrates the full workflow and writes the decision policy card |
+| `underwriting/data.py` | Loads data, infers schema, and creates data-quality summaries |
+| `underwriting/validation.py` | Validates input schema, target, numeric columns, and plausibility checks |
+| `underwriting/modeling.py` | Builds preprocessing and model pipeline, and prepares train/test splits |
+| `underwriting/calibration.py` | Computes calibration bins and ECE |
+| `underwriting/abstention.py` | Builds coverage curves and recommends abstention policies |
+| `underwriting/evaluation.py` | Computes probability metrics, baselines, and policy variants |
+| `underwriting/slices.py` | Generates slice-level safety reports |
+| `underwriting/plots.py` | Generates diagnostic figures |
+| `underwriting/pipeline.py` | Orchestrates the full workflow and writes the decision policy card |
 
 </div>
 

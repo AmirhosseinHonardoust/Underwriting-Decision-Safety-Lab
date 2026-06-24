@@ -12,10 +12,10 @@ license = { file = "LICENSE" }
 dynamic = ["dependencies"]
 
 [project.scripts]
-underwriting-pipeline = "src.pipeline:main"
+underwriting-pipeline = "underwriting.pipeline:main"
 
 [tool.setuptools]
-packages = ["src"]
+packages = ["underwriting"]
 
 [tool.setuptools.dynamic]
 dependencies = { file = ["requirements.txt"] }
@@ -32,7 +32,7 @@ line-length = 100
 target-version = ["py310", "py311", "py312"]
 
 [tool.mypy]
-files = ["src", "app"]
+files = ["underwriting", "app"]
 ignore_missing_imports = true
 namespace_packages = true
 explicit_package_bases = true
@@ -42,3 +42,10 @@ disallow_untyped_defs = true
 disallow_incomplete_defs = true
 no_implicit_optional = true
 strict_equality = true
+
+[tool.coverage.run]
+source = ["underwriting"]
+
+[tool.coverage.report]
+fail_under = 85
+show_missing = true

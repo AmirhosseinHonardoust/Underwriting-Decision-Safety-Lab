@@ -1,0 +1,91 @@
+from __future__ import annotations
+
+from collections.abc import Sequence
+from dataclasses import dataclass
+from typing import TypedDict
+
+import pandas as pd
+from sklearn.compose import ColumnTransformer
+from sklearn.linear_model import LogisticRegression
+from sklearn.metrics import (
+    accuracy_score,
+    average_precision_score,
+    brier_score_loss,
+    f1_score,
+    roc_auc_score,
+)
+from sklearn.model_selection import train_test_split
+from sklearn.pipeline import Pipeline
+from sklearn.preprocessing import OneHotEncoder, StandardScaler
+
+from ._typing import FloatArray, IntArray
+
+
+@dataclass
+class SplitData:
+    X_train: pd.DataFrame
+    X_test: pd.DataFrame
+    y_train: IntArray
+    y_test: IntArray
+
+
+class BinaryMetrics(TypedDict):
+    accuracy: float
+    f1: float
+    brier: float
+    average_precision: float
+    roc_auc: float
+
+
+def make_preprocessor(
+    numeric_cols: Sequence[str], categorical_cols: Sequence[str]
+) -> ColumnTransformer:
+    num_pipe = Pipeline([("scaler", StandardScaler())])
+    cat_pipe = Pipeline([("onehot", OneHotEncoder(handle_unknown="ignore", sparse_output=False))])
+
+    return ColumnTransformer(
+        transformers=[
+            ("num", num_pipe, list(numeric_cols)),
+            ("cat", cat_pipe, list(categorical_cols)),
+        ],
+        remainder="drop",
+    )
+
+
+def make_base_model(random_state: int = 42) -> LogisticRegression:
+    return LogisticRegression(
+        max_iter=2000,
+        solver="lbfgs",
+        class_weight="balanced",
+        random_state=random_state,
+    )
+
+
+def train_test_split_data(
+    df: pd.DataFrame, target: str, *, test_size: float = 0.25, random_state: int = 42
+) -> SplitData:
+    X = df.drop(columns=[target])
+    y = df[target].astype(int).to_numpy()
+
+    X_train, X_test, y_train, y_test = train_test_split(
+        X, y, test_size=test_size, random_state=random_state, stratify=y
+    )
+    return SplitData(X_train=X_train, X_test=X_test, y_train=y_train, y_test=y_test)
+
+
+def compute_binary_metrics(
+    y_true: IntArray, proba_approve: FloatArray, y_pred: IntArray
+) -> BinaryMetrics:
+    try:
+        roc_auc = float(roc_auc_score(y_true, proba_approve))
+    except ValueError:
+        # roc_auc is undefined when y_true contains a single class.
+        roc_auc = float("nan")
+    out: BinaryMetrics = {
+        "accuracy": float(accuracy_score(y_true, y_pred)),
+        "f1": float(f1_score(y_true, y_pred)),
+        "brier": float(brier_score_loss(y_true, proba_approve)),
+        "average_precision": float(average_precision_score(y_true, proba_approve)),
+        "roc_auc": roc_auc,
+    }
+    return out

@@ -7,7 +7,7 @@ from pathlib import Path
 
 import pandas as pd
 
-from src.slices import (
+from underwriting.slices import (
     add_numeric_slice_bins,
     build_slice_report,
     save_slice_artifacts,
