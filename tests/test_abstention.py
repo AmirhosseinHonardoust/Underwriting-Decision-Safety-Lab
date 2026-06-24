@@ -8,8 +8,8 @@ from pathlib import Path
 import numpy as np
 import pandas as pd
 
-from src.abstention import coverage_curve, recommend_threshold
-from src.data import load_csv
+from underwriting.abstention import coverage_curve, recommend_threshold
+from underwriting.data import load_csv
 
 
 class CoverageCurveTests(unittest.TestCase):

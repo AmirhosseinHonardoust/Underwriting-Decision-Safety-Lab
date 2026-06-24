@@ -13,6 +13,8 @@ from sklearn.metrics import (
     precision_recall_curve,
 )
 
+from ._typing import FloatArray, IntArray
+
 try:  # package import
     from .calibration import calibration_bins
 except ImportError:  # script-style import fallback
@@ -23,7 +25,7 @@ def _ensure_dir(p: Path) -> None:
     p.mkdir(parents=True, exist_ok=True)
 
 
-def plot_confusion_matrix(y_true: np.ndarray, y_pred: np.ndarray, outpath: Path) -> None:
+def plot_confusion_matrix(y_true: IntArray, y_pred: IntArray, outpath: Path) -> None:
     _ensure_dir(outpath.parent)
     cm = confusion_matrix(y_true, y_pred, labels=[0, 1])
     disp = ConfusionMatrixDisplay(cm, display_labels=["Reject (0)", "Approve (1)"])
@@ -36,7 +38,7 @@ def plot_confusion_matrix(y_true: np.ndarray, y_pred: np.ndarray, outpath: Path)
 
 
 def plot_reliability_diagram(
-    y_true: np.ndarray, p: np.ndarray, outpath: Path, n_bins: int = 10
+    y_true: IntArray, p: FloatArray, outpath: Path, n_bins: int = 10
 ) -> None:
     """Plot predicted approval probability vs observed approval rate."""
     _ensure_dir(outpath.parent)
@@ -59,7 +61,7 @@ def plot_reliability_diagram(
     plt.close(fig)
 
 
-def plot_probability_histograms(y_true: np.ndarray, p: np.ndarray, outpath: Path) -> None:
+def plot_probability_histograms(y_true: IntArray, p: FloatArray, outpath: Path) -> None:
     _ensure_dir(outpath.parent)
 
     p = np.asarray(p)
@@ -77,7 +79,7 @@ def plot_probability_histograms(y_true: np.ndarray, p: np.ndarray, outpath: Path
     plt.close(fig)
 
 
-def plot_precision_recall_curve(y_true: np.ndarray, p: np.ndarray, outpath: Path) -> None:
+def plot_precision_recall_curve(y_true: IntArray, p: FloatArray, outpath: Path) -> None:
     _ensure_dir(outpath.parent)
 
     precision, recall, _ = precision_recall_curve(y_true, p)

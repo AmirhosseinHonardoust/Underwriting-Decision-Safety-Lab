@@ -7,8 +7,13 @@ on:
 
 jobs:
   quality:
-    name: Lint, format, and type checks
+    name: Lint, format, and type checks on Python ${{ matrix.python-version }}
     runs-on: ubuntu-latest
+
+    strategy:
+      fail-fast: false
+      matrix:
+        python-version: ["3.10", "3.11", "3.12"]
 
     steps:
       - name: Check out repository
@@ -17,7 +22,7 @@ jobs:
       - name: Set up Python
         uses: actions/setup-python@v5
         with:
-          python-version: "3.12"
+          python-version: ${{ matrix.python-version }}
           cache: "pip"
 
       - name: Install quality tools
@@ -26,10 +31,10 @@ jobs:
           pip install -r requirements-dev.txt
 
       - name: Ruff (lint)
-        run: ruff check src app tests
+        run: ruff check underwriting app tests
 
       - name: Black (format check)
-        run: black --check src app tests
+        run: black --check underwriting app tests
 
       - name: Mypy (type check)
         run: mypy
@@ -57,20 +62,20 @@ jobs:
         run: |
           python -m pip install --upgrade pip
           pip install -r requirements.txt
-          pip install coverage==7.14.3
+          pip install 'coverage[toml]==7.14.3'
 
       - name: Check source files compile
         run: |
-          python -m compileall src app tests
+          python -m compileall underwriting app tests
 
       - name: Run unit tests with coverage
         run: |
-          coverage run --source=src -m unittest discover -s tests -v
-          coverage report -m --fail-under=80
+          coverage run -m unittest discover -s tests -v
+          coverage report
 
       - name: Run pipeline smoke workflow
         run: |
-          python -m src.pipeline \
+          python -m underwriting.pipeline \
             --input data/raw/loanapproval.csv \
             --out-dir ci_outputs \
             --figures-dir ci_figures \

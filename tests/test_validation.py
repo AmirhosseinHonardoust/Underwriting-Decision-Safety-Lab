@@ -4,8 +4,8 @@ import unittest
 
 import pandas as pd
 
-from src.data import infer_spec
-from src.validation import (
+from underwriting.data import infer_spec
+from underwriting.validation import (
     DataValidationError,
     validate_dataframe_structure,
     validate_target_column,

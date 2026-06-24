@@ -8,10 +8,10 @@ import numpy as np
 import pandas as pd
 from sklearn.pipeline import Pipeline
 
-from src.abstention import coverage_curve, recommend_threshold
-from src.data import basic_quality_report, infer_spec
-from src.modeling import make_base_model, make_preprocessor, train_test_split_data
-from src.pipeline import run
+from underwriting.abstention import coverage_curve, recommend_threshold
+from underwriting.data import basic_quality_report, infer_spec
+from underwriting.modeling import make_base_model, make_preprocessor, train_test_split_data
+from underwriting.pipeline import run
 
 ROOT = Path(__file__).resolve().parents[1]
 DATA_PATH = ROOT / "data" / "raw" / "loanapproval.csv"

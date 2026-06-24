@@ -6,8 +6,8 @@ from pathlib import Path
 
 import numpy as np
 
-from src.calibration import calibration_bins, expected_calibration_error
-from src.plots import plot_reliability_diagram
+from underwriting.calibration import calibration_bins, expected_calibration_error
+from underwriting.plots import plot_reliability_diagram
 
 
 class CalibrationTests(unittest.TestCase):

@@ -4,7 +4,6 @@ from collections.abc import Sequence
 from dataclasses import dataclass
 from typing import TypedDict
 
-import numpy as np
 import pandas as pd
 from sklearn.compose import ColumnTransformer
 from sklearn.linear_model import LogisticRegression
@@ -19,13 +18,15 @@ from sklearn.model_selection import train_test_split
 from sklearn.pipeline import Pipeline
 from sklearn.preprocessing import OneHotEncoder, StandardScaler
 
+from ._typing import FloatArray, IntArray
+
 
 @dataclass
 class SplitData:
     X_train: pd.DataFrame
     X_test: pd.DataFrame
-    y_train: np.ndarray
-    y_test: np.ndarray
+    y_train: IntArray
+    y_test: IntArray
 
 
 class BinaryMetrics(TypedDict):
@@ -73,7 +74,7 @@ def train_test_split_data(
 
 
 def compute_binary_metrics(
-    y_true: np.ndarray, proba_approve: np.ndarray, y_pred: np.ndarray
+    y_true: IntArray, proba_approve: FloatArray, y_pred: IntArray
 ) -> BinaryMetrics:
     try:
         roc_auc = float(roc_auc_score(y_true, proba_approve))

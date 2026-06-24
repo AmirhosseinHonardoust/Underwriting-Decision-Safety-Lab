@@ -7,12 +7,14 @@ import pandas as pd
 from sklearn.base import BaseEstimator
 from sklearn.calibration import CalibratedClassifierCV
 
+from ._typing import FloatArray, IntArray
+
 
 def _validate_binary_calibration_inputs(
-    y_true: np.ndarray,
-    p: np.ndarray,
+    y_true: IntArray,
+    p: FloatArray,
     n_bins: int,
-) -> tuple[np.ndarray, np.ndarray]:
+) -> tuple[FloatArray, FloatArray]:
     """Validate and normalize inputs used by calibration helpers."""
     y = np.asarray(y_true, dtype=float).reshape(-1)
     prob = np.asarray(p, dtype=float).reshape(-1)
@@ -40,8 +42,8 @@ def _validate_binary_calibration_inputs(
 
 
 def calibration_bins(
-    y_true: np.ndarray,
-    p: np.ndarray,
+    y_true: IntArray,
+    p: FloatArray,
     n_bins: int = 10,
 ) -> list[dict[str, Any]]:
     """Return per-bin binary probability calibration statistics.
@@ -95,7 +97,7 @@ def calibration_bins(
     return rows
 
 
-def expected_calibration_error(y_true: np.ndarray, p: np.ndarray, n_bins: int = 10) -> float:
+def expected_calibration_error(y_true: IntArray, p: FloatArray, n_bins: int = 10) -> float:
     """Compute binary expected calibration error for positive-class probabilities.
 
     ECE is the weighted average absolute difference between each bin's mean
@@ -115,7 +117,7 @@ def expected_calibration_error(y_true: np.ndarray, p: np.ndarray, n_bins: int = 
 def calibrate(
     estimator: BaseEstimator,
     X_train: pd.DataFrame,
-    y_train: np.ndarray,
+    y_train: IntArray,
     method: str = "sigmoid",
     cv: int = 3,
 ) -> CalibratedClassifierCV:

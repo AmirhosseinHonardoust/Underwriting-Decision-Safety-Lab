@@ -13,13 +13,15 @@ from sklearn.metrics import (
     roc_auc_score,
 )
 
+from ._typing import FloatArray, IntArray
+
 
 def _safe_float(value: float) -> float | None:
     value = float(value)
     return None if not np.isfinite(value) else value
 
 
-def probability_metrics(y_true: np.ndarray, p_approve: np.ndarray) -> dict[str, float | None]:
+def probability_metrics(y_true: IntArray, p_approve: FloatArray) -> dict[str, float | None]:
     """Compute probability-quality metrics for binary approval probabilities."""
     y = np.asarray(y_true, dtype=int)
     p = np.asarray(p_approve, dtype=float)
@@ -45,8 +47,8 @@ def probability_metrics(y_true: np.ndarray, p_approve: np.ndarray) -> dict[str, 
 
 
 def classification_metrics_at_threshold(
-    y_true: np.ndarray,
-    p_approve: np.ndarray,
+    y_true: IntArray,
+    p_approve: FloatArray,
     threshold: float = 0.5,
 ) -> dict[str, float]:
     """Compute classification metrics after thresholding approval probabilities."""
@@ -63,9 +65,9 @@ def classification_metrics_at_threshold(
 
 def compute_baseline_metrics(
     X_train: pd.DataFrame,
-    y_train: np.ndarray,
+    y_train: IntArray,
     X_test: pd.DataFrame,
-    y_test: np.ndarray,
+    y_test: IntArray,
 ) -> dict[str, dict[str, Any]]:
     """Evaluate simple baselines for context.
 

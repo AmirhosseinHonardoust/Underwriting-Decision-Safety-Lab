@@ -6,6 +6,8 @@ import numpy as np
 import pandas as pd
 from sklearn.metrics import accuracy_score, f1_score
 
+from ._typing import FloatArray, IntArray
+
 
 class AbstentionPolicy(TypedDict):
     recommended_threshold: float
@@ -14,9 +16,7 @@ class AbstentionPolicy(TypedDict):
     expected_f1_auto: float
 
 
-def coverage_curve(
-    y_true: np.ndarray, p_approve: np.ndarray, thresholds: np.ndarray
-) -> pd.DataFrame:
+def coverage_curve(y_true: IntArray, p_approve: FloatArray, thresholds: FloatArray) -> pd.DataFrame:
     y_true = np.asarray(y_true)
     p = np.asarray(p_approve)
 
