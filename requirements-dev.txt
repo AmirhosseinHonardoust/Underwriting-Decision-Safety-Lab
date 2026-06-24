@@ -1,4 +1,4 @@
-# Development tools for linting, formatting, and type checking.
+# Development tools for linting, formatting, type checking, coverage, and hooks.
 # Versions are pinned to match the CI quality job exactly.
 # Install alongside runtime deps:  pip install -r requirements.txt -r requirements-dev.txt
 #
@@ -7,3 +7,5 @@
 ruff==0.15.19
 black==26.5.1
 mypy==2.1.0
+coverage==7.14.3
+pre-commit==4.6.0

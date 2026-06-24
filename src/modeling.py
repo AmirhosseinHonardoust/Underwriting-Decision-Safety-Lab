@@ -1,6 +1,8 @@
 from __future__ import annotations
 
+from collections.abc import Sequence
 from dataclasses import dataclass
+from typing import TypedDict
 
 import numpy as np
 import pandas as pd
@@ -26,7 +28,17 @@ class SplitData:
     y_test: np.ndarray
 
 
-def make_preprocessor(numeric_cols, categorical_cols) -> ColumnTransformer:
+class BinaryMetrics(TypedDict):
+    accuracy: float
+    f1: float
+    brier: float
+    average_precision: float
+    roc_auc: float
+
+
+def make_preprocessor(
+    numeric_cols: Sequence[str], categorical_cols: Sequence[str]
+) -> ColumnTransformer:
     num_pipe = Pipeline([("scaler", StandardScaler())])
     cat_pipe = Pipeline([("onehot", OneHotEncoder(handle_unknown="ignore", sparse_output=False))])
 
@@ -49,7 +61,7 @@ def make_base_model(random_state: int = 42) -> LogisticRegression:
 
 
 def train_test_split_data(
-    df: pd.DataFrame, target: str, *, test_size=0.25, random_state=42
+    df: pd.DataFrame, target: str, *, test_size: float = 0.25, random_state: int = 42
 ) -> SplitData:
     X = df.drop(columns=[target])
     y = df[target].astype(int).to_numpy()
@@ -62,16 +74,17 @@ def train_test_split_data(
 
 def compute_binary_metrics(
     y_true: np.ndarray, proba_approve: np.ndarray, y_pred: np.ndarray
-) -> dict[str, float]:
-    out = {
+) -> BinaryMetrics:
+    try:
+        roc_auc = float(roc_auc_score(y_true, proba_approve))
+    except ValueError:
+        # roc_auc is undefined when y_true contains a single class.
+        roc_auc = float("nan")
+    out: BinaryMetrics = {
         "accuracy": float(accuracy_score(y_true, y_pred)),
         "f1": float(f1_score(y_true, y_pred)),
         "brier": float(brier_score_loss(y_true, proba_approve)),
         "average_precision": float(average_precision_score(y_true, proba_approve)),
+        "roc_auc": roc_auc,
     }
-    try:
-        out["roc_auc"] = float(roc_auc_score(y_true, proba_approve))
-    except ValueError:
-        # roc_auc is undefined when y_true contains a single class.
-        out["roc_auc"] = float("nan")
     return out

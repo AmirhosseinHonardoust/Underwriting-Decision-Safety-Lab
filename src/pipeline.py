@@ -66,7 +66,7 @@ def run(
     p_test = cal.predict_proba(split.X_test)[:, 1]
     y_pred = (p_test >= 0.5).astype(int)
 
-    metrics: dict[str, Any] = compute_binary_metrics(split.y_test, p_test, y_pred)
+    metrics: dict[str, Any] = dict(compute_binary_metrics(split.y_test, p_test, y_pred))
     metrics["ece"] = float(expected_calibration_error(split.y_test, p_test, n_bins=10))
     metrics["labels"] = ["reject", "approve"]
     metrics["calibration_method"] = str(calibration_method)
@@ -77,8 +77,8 @@ def run(
 
     thresholds = np.linspace(0.50, 0.99, 40)
     curve = coverage_curve(split.y_test, p_test, thresholds)
-    policy: dict[str, Any] = recommend_threshold(
-        curve, target_coverage=float(recommend_target_coverage)
+    policy: dict[str, Any] = dict(
+        recommend_threshold(curve, target_coverage=float(recommend_target_coverage))
     )
     policy["target_coverage"] = float(recommend_target_coverage)
     policy["calibration_method"] = str(calibration_method)

@@ -1,3 +1,25 @@
+[build-system]
+requires = ["setuptools>=64"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "underwriting-decision-safety-lab"
+version = "0.1.0"
+description = "Calibrated, abstention-aware underwriting decision-safety lab"
+readme = "README.md"
+requires-python = ">=3.10"
+license = { file = "LICENSE" }
+dynamic = ["dependencies"]
+
+[project.scripts]
+underwriting-pipeline = "src.pipeline:main"
+
+[tool.setuptools]
+packages = ["src"]
+
+[tool.setuptools.dynamic]
+dependencies = { file = ["requirements.txt"] }
+
 [tool.ruff]
 line-length = 100
 target-version = "py310"
@@ -15,3 +37,8 @@ ignore_missing_imports = true
 namespace_packages = true
 explicit_package_bases = true
 warn_unused_ignores = true
+warn_redundant_casts = true
+disallow_untyped_defs = true
+disallow_incomplete_defs = true
+no_implicit_optional = true
+strict_equality = true
