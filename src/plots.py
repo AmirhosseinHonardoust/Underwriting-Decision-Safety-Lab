@@ -16,7 +16,7 @@ from sklearn.metrics import (
 try:  # package import
     from .calibration import calibration_bins
 except ImportError:  # script-style import fallback
-    from calibration import calibration_bins
+    from calibration import calibration_bins  # type: ignore[no-redef]
 
 
 def _ensure_dir(p: Path) -> None:
