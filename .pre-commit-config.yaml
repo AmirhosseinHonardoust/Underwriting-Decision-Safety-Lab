@@ -1,4 +1,4 @@
-# Pre-commit hooks mirror the CI quality job (ruff, black, mypy).
+# Pre-commit hooks mirror the CI quality job (ruff, black, mypy, interrogate).
 # Install once with:  pre-commit install
 # Run on demand with: pre-commit run --all-files
 repos:
@@ -17,3 +17,12 @@ repos:
     hooks:
       - id: mypy
         pass_filenames: false
+        additional_dependencies:
+          - pandas-stubs==3.0.3.260530
+
+  - repo: https://github.com/econchick/interrogate
+    rev: 1.7.0
+    hooks:
+      - id: interrogate
+        pass_filenames: false
+        args: ["underwriting"]
