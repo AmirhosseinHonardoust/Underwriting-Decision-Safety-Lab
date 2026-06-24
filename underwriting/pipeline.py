@@ -18,6 +18,7 @@ from .abstention import coverage_curve, recommend_threshold
 from .calibration import calibrate, expected_calibration_error
 from .data import basic_quality_report, infer_spec, load_csv
 from .evaluation import compute_baseline_metrics, select_policy_variants
+from .model_card import build_model_card_html
 from .modeling import (
     compute_binary_metrics,
     make_base_model,
@@ -234,6 +235,17 @@ def run(
         target_coverage=recommend_target_coverage,
     )
     (out_dir_p / "run_manifest.json").write_text(json.dumps(manifest, indent=2), encoding="utf-8")
+
+    model_card = build_model_card_html(
+        metrics=metrics,
+        policy=policy,
+        baseline_metrics=baseline_metrics,
+        slice_summary=slice_summary,
+        data_quality=dq,
+        figures_dir=fig_dir_p,
+        manifest=manifest,
+    )
+    (out_dir_p / "model_card.html").write_text(model_card, encoding="utf-8")
 
     return {
         "metrics": metrics,

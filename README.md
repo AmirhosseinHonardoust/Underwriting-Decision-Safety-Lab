@@ -165,6 +165,7 @@ Underwriting-Decision-Safety-Lab/
 │   ├── data_quality.json
 │   ├── evaluation_summary.json
 │   ├── metrics_overall.json
+│   ├── model_card.html
 │   ├── model.joblib
 │   ├── policy_card.md
 │   ├── policy_variants.json
@@ -192,6 +193,7 @@ Underwriting-Decision-Safety-Lab/
 │   ├── data.py
 │   ├── evaluation.py
 │   ├── modeling.py
+│   ├── model_card.py
 │   ├── pipeline.py
 │   ├── plots.py
 │   ├── slices.py
@@ -314,12 +316,17 @@ outputs/abstention_policy.json
 outputs/policy_variants.json
 outputs/test_predictions.csv
 outputs/model.joblib
+outputs/model_card.html
 outputs/run_manifest.json
 reports/figures/reliability_diagram.png
 reports/figures/precision_recall_curve.png
 reports/figures/coverage_vs_performance.png
 reports/figures/confusion_matrix.png
 ```
+
+`model_card.html` is a single, self-contained report (figures embedded as base64)
+summarizing headline metrics, the recommended decision policy, baselines, slice
+safety, all diagnostic figures, and run provenance &mdash; shareable as one file.
 
 `run_manifest.json` records run provenance — input SHA-256, row count, the
 `random_state` and policy config, and Python/library versions — so any run can be
