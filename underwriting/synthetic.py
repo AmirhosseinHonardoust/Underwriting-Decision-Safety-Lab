@@ -66,6 +66,7 @@ def generate_synthetic(n_rows: int = 1000, random_state: int = 0) -> pd.DataFram
 
 
 def main() -> None:
+    """Command-line entry point for generating a synthetic dataset."""
     p = argparse.ArgumentParser(description="Generate a synthetic loan-approval dataset")
     p.add_argument("--out", required=True, help="Output CSV path")
     p.add_argument("--rows", type=int, default=1000, help="Number of rows to generate")

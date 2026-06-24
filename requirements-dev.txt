@@ -1,11 +1,15 @@
-# Development tools for linting, formatting, type checking, coverage, and hooks.
+# Development tools for linting, formatting, type checking, coverage,
+# docstring coverage, type stubs, and hooks.
 # Versions are pinned to match the CI quality job exactly.
 # Install alongside runtime deps:  pip install -r requirements.txt -r requirements-dev.txt
 #
-# Type stubs are intentionally omitted: mypy is configured with
-# ignore_missing_imports, so third-party stubs are not required.
+# pandas-stubs gives mypy real pandas types. Other third-party libraries
+# (scikit-learn, matplotlib, etc.) have no usable stubs and remain untyped.
+# Pinned to the 2.3.x line so it installs on Python 3.10 (3.0.x needs >=3.11).
 ruff==0.15.19
 black==26.5.1
 mypy==2.1.0
 coverage[toml]==7.14.3
 pre-commit==4.6.0
+interrogate==1.7.0
+pandas-stubs==2.3.3.260113

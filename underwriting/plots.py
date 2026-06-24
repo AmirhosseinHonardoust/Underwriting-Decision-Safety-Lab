@@ -26,6 +26,7 @@ def _ensure_dir(p: Path) -> None:
 
 
 def plot_confusion_matrix(y_true: IntArray, y_pred: IntArray, outpath: Path) -> None:
+    """Save a confusion-matrix figure for the test predictions."""
     _ensure_dir(outpath.parent)
     cm = confusion_matrix(y_true, y_pred, labels=[0, 1])
     disp = ConfusionMatrixDisplay(cm, display_labels=["Reject (0)", "Approve (1)"])
@@ -62,6 +63,7 @@ def plot_reliability_diagram(
 
 
 def plot_probability_histograms(y_true: IntArray, p: FloatArray, outpath: Path) -> None:
+    """Save approval-probability histograms split by true class."""
     _ensure_dir(outpath.parent)
 
     p = np.asarray(p)
@@ -80,6 +82,7 @@ def plot_probability_histograms(y_true: IntArray, p: FloatArray, outpath: Path) 
 
 
 def plot_precision_recall_curve(y_true: IntArray, p: FloatArray, outpath: Path) -> None:
+    """Save the precision-recall curve figure."""
     _ensure_dir(outpath.parent)
 
     precision, recall, _ = precision_recall_curve(y_true, p)
@@ -97,6 +100,7 @@ def plot_precision_recall_curve(y_true: IntArray, p: FloatArray, outpath: Path) 
 
 
 def plot_coverage_vs_performance(curve: pd.DataFrame, outpath: Path) -> None:
+    """Save the coverage-vs-performance trade-off figure."""
     _ensure_dir(outpath.parent)
 
     fig, ax = plt.subplots(figsize=(7.8, 5.6))

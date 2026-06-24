@@ -11,6 +11,8 @@ TARGET_CANDIDATES = ["loan_approved", "approved", "LoanApproved", "target", "lab
 
 @dataclass
 class DataSpec:
+    """Inferred dataset schema: target, id, numeric, and categorical columns."""
+
     target: str
     id_cols: list[str]
     numeric_cols: list[str]
@@ -18,6 +20,7 @@ class DataSpec:
 
 
 def infer_spec(df: pd.DataFrame) -> DataSpec:
+    """Infer the dataset schema (target, id, numeric, categorical columns)."""
     validate_dataframe_structure(df)
     cols = df.columns.tolist()
     target = None
@@ -40,12 +43,14 @@ def infer_spec(df: pd.DataFrame) -> DataSpec:
 
 
 def load_csv(path: str) -> pd.DataFrame:
+    """Read the input CSV into a DataFrame (validation happens in infer_spec)."""
     # Structural validation runs in infer_spec, the schema-inference entry point,
     # so the pipeline validates exactly once per run.
     return pd.read_csv(path)
 
 
 def basic_quality_report(df: pd.DataFrame, spec: DataSpec) -> dict:
+    """Summarize row/column counts, missing rates, and per-column uniqueness."""
     out = {
         "rows": int(len(df)),
         "cols": int(df.shape[1]),

@@ -39,6 +39,9 @@ jobs:
       - name: Mypy (type check)
         run: mypy
 
+      - name: Interrogate (docstring coverage)
+        run: interrogate underwriting
+
   test-and-smoke:
     name: Test and smoke workflow on Python ${{ matrix.python-version }}
     runs-on: ubuntu-latest

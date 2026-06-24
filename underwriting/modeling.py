@@ -23,6 +23,8 @@ from ._typing import FloatArray, IntArray
 
 @dataclass
 class SplitData:
+    """Train/test split as feature frames and integer label arrays."""
+
     X_train: pd.DataFrame
     X_test: pd.DataFrame
     y_train: IntArray
@@ -30,6 +32,8 @@ class SplitData:
 
 
 class BinaryMetrics(TypedDict):
+    """Headline binary-classification metrics for the positive (approve) class."""
+
     accuracy: float
     f1: float
     brier: float
@@ -40,6 +44,7 @@ class BinaryMetrics(TypedDict):
 def make_preprocessor(
     numeric_cols: Sequence[str], categorical_cols: Sequence[str]
 ) -> ColumnTransformer:
+    """Build the numeric-scaling + one-hot categorical preprocessing transformer."""
     num_pipe = Pipeline([("scaler", StandardScaler())])
     cat_pipe = Pipeline([("onehot", OneHotEncoder(handle_unknown="ignore", sparse_output=False))])
 
@@ -53,6 +58,7 @@ def make_preprocessor(
 
 
 def make_base_model(random_state: int = 42) -> LogisticRegression:
+    """Build the base balanced logistic-regression classifier."""
     return LogisticRegression(
         max_iter=2000,
         solver="lbfgs",
@@ -64,6 +70,7 @@ def make_base_model(random_state: int = 42) -> LogisticRegression:
 def train_test_split_data(
     df: pd.DataFrame, target: str, *, test_size: float = 0.25, random_state: int = 42
 ) -> SplitData:
+    """Split a model-ready frame into a stratified SplitData train/test pair."""
     X = df.drop(columns=[target])
     y = df[target].astype(int).to_numpy()
 
@@ -76,6 +83,7 @@ def train_test_split_data(
 def compute_binary_metrics(
     y_true: IntArray, proba_approve: FloatArray, y_pred: IntArray
 ) -> BinaryMetrics:
+    """Compute accuracy, F1, Brier, average precision, and ROC AUC."""
     try:
         roc_auc = float(roc_auc_score(y_true, proba_approve))
     except ValueError:

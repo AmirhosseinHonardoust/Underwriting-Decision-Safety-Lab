@@ -16,6 +16,8 @@ based on [Keep a Changelog](https://keepachangelog.com/).
 - The lint/format/type quality job now runs across Python 3.10, 3.11, and 3.12.
 
 ### Added
+- `pandas-stubs` so mypy type-checks the pandas boundary; docstrings on the full
+  public API with an `interrogate` 100% docstring-coverage gate in CI and pre-commit.
 - Consolidated, self-contained `model_card.html` generated each run (metrics,
   policy, baselines, slice safety, embedded figures, and provenance in one file).
 - Synthetic data generator (`underwriting.synthetic`, `underwriting-generate-data`)
