@@ -184,6 +184,7 @@ Underwriting-Decision-Safety-Lab/
 │       └── slice_review_rates.png
 │
 ├── src/
+│   ├── __init__.py
 │   ├── abstention.py
 │   ├── calibration.py
 │   ├── data.py
@@ -191,8 +192,6 @@ Underwriting-Decision-Safety-Lab/
 │   ├── modeling.py
 │   ├── pipeline.py
 │   ├── plots.py
-│   ├── policy.py
-│   ├── quality.py
 │   ├── slices.py
 │   └── validation.py
 │
@@ -204,7 +203,9 @@ Underwriting-Decision-Safety-Lab/
 │   ├── test_slice_reporting.py
 │   └── test_validation.py
 │
+├── .gitignore
 ├── README.md
+├── pyproject.toml
 ├── requirements.txt
 └── LICENSE
 ```
@@ -549,17 +550,15 @@ The project separates major responsibilities across modules:
 
 | Module | Purpose |
 |---|---|
-| `src/data.py` | Loads data, infers schema, and prepares train/test splits |
+| `src/data.py` | Loads data, infers schema, and creates data-quality summaries |
 | `src/validation.py` | Validates input schema, target, numeric columns, and plausibility checks |
-| `src/modeling.py` | Builds preprocessing and model pipeline |
+| `src/modeling.py` | Builds preprocessing and model pipeline, and prepares train/test splits |
 | `src/calibration.py` | Computes calibration bins and ECE |
 | `src/abstention.py` | Builds coverage curves and recommends abstention policies |
 | `src/evaluation.py` | Computes probability metrics, baselines, and policy variants |
 | `src/slices.py` | Generates slice-level safety reports |
 | `src/plots.py` | Generates diagnostic figures |
-| `src/policy.py` | Writes the decision policy card |
-| `src/quality.py` | Creates data-quality summaries |
-| `src/pipeline.py` | Orchestrates the full workflow |
+| `src/pipeline.py` | Orchestrates the full workflow and writes the decision policy card |
 
 </div>
 
