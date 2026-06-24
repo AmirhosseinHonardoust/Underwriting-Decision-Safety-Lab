@@ -1,0 +1,20 @@
+# Byte-compiled / cache
+__pycache__/
+*.py[cod]
+*.egg-info/
+
+# Virtual environments
+.venv/
+venv/
+
+# Tooling caches
+.mypy_cache/
+.ruff_cache/
+.pytest_cache/
+
+# CI scratch output dirs (the committed outputs/ and reports/figures/ are intentional)
+ci_outputs/
+ci_figures/
+
+# OS files
+.DS_Store
