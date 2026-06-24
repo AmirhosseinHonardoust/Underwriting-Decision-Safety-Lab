@@ -3,6 +3,8 @@ from __future__ import annotations
 from typing import Any
 
 import numpy as np
+import pandas as pd
+from sklearn.base import BaseEstimator
 from sklearn.calibration import CalibratedClassifierCV
 
 
@@ -110,7 +112,13 @@ def expected_calibration_error(y_true: np.ndarray, p: np.ndarray, n_bins: int = 
     return float(ece)
 
 
-def calibrate(estimator, X_train, y_train, method: str = "sigmoid", cv: int = 3):
+def calibrate(
+    estimator: BaseEstimator,
+    X_train: pd.DataFrame,
+    y_train: np.ndarray,
+    method: str = "sigmoid",
+    cv: int = 3,
+) -> CalibratedClassifierCV:
     cal = CalibratedClassifierCV(estimator, method=method, cv=cv)
     cal.fit(X_train, y_train)
     return cal

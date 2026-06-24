@@ -196,6 +196,7 @@ Underwriting-Decision-Safety-Lab/
 │   └── validation.py
 │
 ├── tests/
+│   ├── test_abstention.py
 │   ├── test_calibration.py
 │   ├── test_evaluation_improvements.py
 │   ├── test_pipeline_contracts.py
@@ -204,9 +205,11 @@ Underwriting-Decision-Safety-Lab/
 │   └── test_validation.py
 │
 ├── .gitignore
+├── .pre-commit-config.yaml
 ├── README.md
 ├── pyproject.toml
 ├── requirements.txt
+├── requirements-dev.txt
 └── LICENSE
 ```
 
@@ -243,6 +246,13 @@ source .venv/bin/activate
 pip install -r requirements.txt
 ```
 
+Optionally install the project as a package to get the `underwriting-pipeline`
+command:
+
+```bash
+pip install -e .
+```
+
 ---
 
 ## Quick Start
@@ -251,6 +261,12 @@ Run the full local workflow:
 
 ```bash
 python -m src.pipeline --input data/raw/loanapproval.csv --target-coverage 0.70
+```
+
+After an editable install, the same workflow is available as a command:
+
+```bash
+underwriting-pipeline --input data/raw/loanapproval.csv --target-coverage 0.70
 ```
 
 Launch the dashboard:
@@ -521,11 +537,28 @@ Compile source files:
 python -m compileall src app tests
 ```
 
+Set up the development tools (linting, formatting, type checking, coverage, hooks):
+
+```bash
+pip install -r requirements.txt -r requirements-dev.txt
+pre-commit install            # optional: run the gate on every commit
+```
+
+Run the quality gate locally (matches CI):
+
+```bash
+ruff check src app tests
+black --check src app tests
+mypy
+coverage run --source=src -m unittest discover -s tests && coverage report -m
+```
+
 The GitHub Actions workflow checks:
 
+- linting (ruff), formatting (black), and type checking (mypy)
 - dependency installation
 - source compilation
-- unit tests
+- unit tests with coverage (minimum 80%)
 - full pipeline smoke workflow
 - metrics artifact validation
 - prediction schema validation

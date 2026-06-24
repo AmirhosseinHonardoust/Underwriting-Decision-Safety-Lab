@@ -1,8 +1,17 @@
 from __future__ import annotations
 
+from typing import TypedDict
+
 import numpy as np
 import pandas as pd
 from sklearn.metrics import accuracy_score, f1_score
+
+
+class AbstentionPolicy(TypedDict):
+    recommended_threshold: float
+    expected_coverage: float
+    expected_accuracy_auto: float
+    expected_f1_auto: float
 
 
 def coverage_curve(
@@ -29,7 +38,7 @@ def coverage_curve(
     return pd.DataFrame(rows)
 
 
-def recommend_threshold(curve: pd.DataFrame, target_coverage: float) -> dict[str, float]:
+def recommend_threshold(curve: pd.DataFrame, target_coverage: float) -> AbstentionPolicy:
     c = curve.copy()
     c["dist"] = (c["coverage"] - float(target_coverage)).abs()
     best = c.sort_values(["dist", "threshold"], ascending=[True, False]).iloc[0]

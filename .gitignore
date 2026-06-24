@@ -12,6 +12,11 @@ venv/
 .ruff_cache/
 .pytest_cache/
 
+# Coverage
+.coverage
+.coverage.*
+htmlcov/
+
 # CI scratch output dirs (the committed outputs/ and reports/figures/ are intentional)
 ci_outputs/
 ci_figures/
