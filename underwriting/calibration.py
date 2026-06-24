@@ -121,6 +121,7 @@ def calibrate(
     method: str = "sigmoid",
     cv: int = 3,
 ) -> CalibratedClassifierCV:
+    """Fit a calibrated classifier wrapping the given estimator."""
     cal = CalibratedClassifierCV(estimator, method=method, cv=cv)
     cal.fit(X_train, y_train)
     return cal

@@ -96,6 +96,7 @@ def run(
     recommend_target_coverage: float = 0.70,
     random_state: int = 42,
 ) -> dict:
+    """Run the full underwriting pipeline and write all artifacts to disk."""
     out_dir_p = Path(out_dir)
     fig_dir_p = Path(figures_dir)
     out_dir_p.mkdir(parents=True, exist_ok=True)
@@ -260,6 +261,7 @@ def run(
 
 
 def main() -> None:
+    """Command-line entry point for the pipeline."""
     p = argparse.ArgumentParser(description="Underwriting Decision Safety Lab pipeline")
     p.add_argument("--input", required=True, help="Path to loan approval CSV")
     p.add_argument("--out-dir", default="outputs", help="Output directory")

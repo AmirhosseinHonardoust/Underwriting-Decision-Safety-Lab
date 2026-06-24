@@ -10,6 +10,8 @@ from ._typing import FloatArray, IntArray
 
 
 class AbstentionPolicy(TypedDict):
+    """Recommended abstention policy: threshold plus expected auto-decision stats."""
+
     recommended_threshold: float
     expected_coverage: float
     expected_accuracy_auto: float
@@ -17,6 +19,7 @@ class AbstentionPolicy(TypedDict):
 
 
 def coverage_curve(y_true: IntArray, p_approve: FloatArray, thresholds: FloatArray) -> pd.DataFrame:
+    """Compute auto-decision coverage and auto-set metrics across thresholds."""
     y_true = np.asarray(y_true)
     p = np.asarray(p_approve)
 
@@ -39,6 +42,7 @@ def coverage_curve(y_true: IntArray, p_approve: FloatArray, thresholds: FloatArr
 
 
 def recommend_threshold(curve: pd.DataFrame, target_coverage: float) -> AbstentionPolicy:
+    """Pick the confidence threshold whose coverage is closest to the target."""
     c = curve.copy()
     c["dist"] = (c["coverage"] - float(target_coverage)).abs()
     best = c.sort_values(["dist", "threshold"], ascending=[True, False]).iloc[0]

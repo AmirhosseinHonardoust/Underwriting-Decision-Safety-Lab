@@ -577,12 +577,14 @@ Run the quality gate locally (matches CI):
 ruff check underwriting app tests
 black --check underwriting app tests
 mypy
+interrogate underwriting
 coverage run --source=underwriting -m unittest discover -s tests && coverage report -m
 ```
 
 The GitHub Actions workflow checks:
 
-- linting (ruff), formatting (black), and type checking (mypy)
+- linting (ruff), formatting (black), type checking (mypy with pandas-stubs)
+- public-API docstring coverage (interrogate, 100%)
 - dependency installation
 - source compilation
 - unit tests with coverage (minimum 80%)

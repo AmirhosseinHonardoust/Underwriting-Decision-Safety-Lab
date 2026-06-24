@@ -12,6 +12,8 @@ class DataValidationError(ValueError):
 
 @dataclass(frozen=True)
 class PlausibilityRule:
+    """Allowed range (and integer-likeness) for a single underwriting column."""
+
     column: str
     minimum: float | None = None
     maximum: float | None = None
