@@ -1,0 +1,9 @@
+# Development tools for linting, formatting, and type checking.
+# Versions are pinned to match the CI quality job exactly.
+# Install alongside runtime deps:  pip install -r requirements.txt -r requirements-dev.txt
+#
+# Type stubs are intentionally omitted: mypy is configured with
+# ignore_missing_imports, so third-party stubs are not required.
+ruff==0.15.19
+black==26.5.1
+mypy==2.1.0
