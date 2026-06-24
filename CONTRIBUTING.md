@@ -24,7 +24,7 @@ coverage run -m unittest discover -s tests && coverage report
 - `ruff` lints with `E, F, I, B, SIM, UP` at line length 100.
 - `black` formats at line length 100.
 - `mypy` runs in the project's strict configuration.
-- Test coverage must stay at or above 85%.
+- Test coverage must stay at or above 90% overall (and 80% per file).
 
 Configuration for all of these lives in `pyproject.toml`.
 
