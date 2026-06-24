@@ -168,6 +168,7 @@ Underwriting-Decision-Safety-Lab/
 │   ├── model.joblib
 │   ├── policy_card.md
 │   ├── policy_variants.json
+│   ├── run_manifest.json
 │   ├── slice_report.csv
 │   ├── slice_report.json
 │   ├── slice_summary.json
@@ -194,6 +195,7 @@ Underwriting-Decision-Safety-Lab/
 │   ├── pipeline.py
 │   ├── plots.py
 │   ├── slices.py
+│   ├── synthetic.py
 │   └── validation.py
 │
 ├── tests/
@@ -260,15 +262,24 @@ pip install -e .
 
 ## Quick Start
 
+No dataset on hand? Generate a synthetic one with the production schema and run
+the whole pipeline with zero external data:
+
+```bash
+python -m underwriting.synthetic --out data/raw/synthetic.csv --rows 1000 --seed 0
+python -m underwriting.pipeline --input data/raw/synthetic.csv --target-coverage 0.70
+```
+
 Run the full local workflow:
 
 ```bash
 python -m underwriting.pipeline --input data/raw/loanapproval.csv --target-coverage 0.70
 ```
 
-After an editable install, the same workflow is available as a command:
+After an editable install, the same workflows are available as commands:
 
 ```bash
+underwriting-generate-data --out data/raw/synthetic.csv --rows 1000 --seed 0
 underwriting-pipeline --input data/raw/loanapproval.csv --target-coverage 0.70
 ```
 
@@ -303,11 +314,17 @@ outputs/abstention_policy.json
 outputs/policy_variants.json
 outputs/test_predictions.csv
 outputs/model.joblib
+outputs/run_manifest.json
 reports/figures/reliability_diagram.png
 reports/figures/precision_recall_curve.png
 reports/figures/coverage_vs_performance.png
 reports/figures/confusion_matrix.png
 ```
+
+`run_manifest.json` records run provenance — input SHA-256, row count, the
+`random_state` and policy config, and Python/library versions — so any run can be
+traced back to its exact inputs and environment. It is environment-specific and
+not expected to be byte-identical across machines.
 
 ---
 
