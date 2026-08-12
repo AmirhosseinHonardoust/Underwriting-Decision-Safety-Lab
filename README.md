@@ -1,6 +1,7 @@
 <div align="center">
 
 # Underwriting Decision Safety Lab
+<img width="1666" height="937" alt="Underwriting-Decision-Safety-Lab" src="https://github.com/user-attachments/assets/4ebc2283-0dff-49c1-ac04-ff80eb1d32e6" />
 
 ![Python](https://img.shields.io/badge/Python-3.10%2B-blue)
 ![scikit-learn](https://img.shields.io/badge/scikit--learn-Decision%20Safety-green)
